@@ -1,1 +1,41 @@
+name: Daily Music Prompt Generator
 
+# 언제 실행할지 설정하는 부분입니다.
+on:
+  schedule:
+    # cron: '분 시 일 월 요일' 순서입니다.
+    # UTC 기준 15:00 = 한국 시간(KST) 00:00 입니다.
+    - cron: '0 15 * * *'
+  
+  # 원할 때 웹에서 수동으로 버튼을 눌러 바로 실행해 볼 수 있게 해주는 옵션입니다.
+  workflow_dispatch:
+
+jobs:
+  generate-prompt:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. 우겸님의 GitHub 저장소에 있는 파일들(JSON, main.py 등)을 불러옵니다.
+      - name: 저장소 파일 불러오기
+        uses: actions/checkout@v4
+
+      # 2. 파이썬 환경을 세팅합니다.
+      - name: Python 설치하기
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      # 3. 파이썬 실행에 필요한 외부 라이브러리(패키지)를 설치합니다. (추후 날씨 API 등 사용 위해)
+      - name: 필요한 패키지 설치하기
+        run: |
+          python -m pip install --upgrade pip
+          # 나중에 외부 API(날씨, 노션, 제미나이 등) 연동을 위해 requests 라이브러리가 필요합니다.
+          pip install requests 
+
+      # 4. 실제 파이썬 코드를 실행합니다!
+      # 실행될 때 컴퓨터의 시간대(Timezone)를 아예 서울로 맞춰버립니다. 
+      # 이렇게 하면 파이썬 코드에서 별도 처리 없이도 KST 기준 00시의 오늘 날짜를 정확히 가져옵니다.
+      - name: 프롬프트 생성 스크립트 실행
+        env:
+          TZ: 'Asia/Seoul' 
+        run: python main.py
