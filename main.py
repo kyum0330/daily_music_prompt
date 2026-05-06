@@ -40,9 +40,38 @@ def generate_lyrics_with_gemini(prompt):
     # Gemini 세팅
     genai.configure(api_key=api_key)
     
-    try:
-        # 모델 선택 (텍스트 생성에 빠르고 똑똑한 gemini-1.5-flash 모델 사용)
-        model = genai.GenerativeModel('gemini-pro')
+  try:
+        # 1. 내 API 키로 당장 사용할 수 있는 모델 목록을 구글 서버에서 모두 가져옵니다.
+        available_models = []
+        for m in genai.list_models():
+            if 'generateContent' in m.supported_generation_methods:
+                available_models.append(m.name)
+                
+        print(f"🔍 [시스템] 현재 사용 가능한 Gemini 모델 목록: {available_models}")
+        
+        # 2. 목록 중에서 가장 적합한 텍스트 생성 모델을 자동으로 찾아냅니다.
+        target_model = None
+        
+        # 최우선 순위: 빠르고 똑똑한 1.5 flash 계열
+        for name in available_models:
+            if 'gemini-1.5-flash' in name:
+                target_model = name
+                break
+                
+        # 차선책: 그냥 gemini라는 이름이 들어간 텍스트 생성 가능 모델 아무거나!
+        if not target_model:
+            for name in available_models:
+                if 'gemini' in name and 'vision' not in name:
+                    target_model = name
+                    break
+                    
+        if not target_model:
+            return "⚠️ 텍스트 생성을 지원하는 모델을 찾지 못했습니다."
+            
+        print(f"🎯 [시스템] 선택된 최적의 모델: {target_model}")
+        
+        # 3. 자동으로 찾은 모델을 적용하여 실행합니다.
+        model = genai.GenerativeModel(target_model)
         
         # 저에게 천재 작사가 역할을 부여합니다!
         system_instruction = (
