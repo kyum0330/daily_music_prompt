@@ -88,7 +88,64 @@ def generate_lyrics_with_gemini(prompt):
         return response.text
     except Exception as e:
         return f"Gemini API 호출 중 에러 발생: {e}"
+        
+def save_to_notion(date_str, genre, weather, prompt, lyrics):
+    """노션 데이터베이스에 새로운 행(페이지)을 추가하는 함수"""
+    notion_token = os.environ.get("NOTION_TOKEN")
+    database_id = os.environ.get("NOTION_DATABASE_ID")
 
+    if not notion_token or not database_id:
+        print("⚠️ Notion 토큰이나 데이터베이스 ID가 없습니다. 저장을 건너뜁니다.")
+        return
+
+    headers = {
+        "Authorization": f"Bearer {notion_token}",
+        "Content-Type": "application/json",
+        "Notion-Version": "2022-06-28"
+    }
+
+    # Title: "2026년 05월 07일 (하우스)" 형태로 저장
+    page_title = f"{date_str} ({genre})"
+
+    data = {
+        "parent": {"database_id": database_id},
+        "properties": {
+            # 우겸님의 노션 컬럼명과 정확히 일치해야 합니다.
+            "Title": {
+                "title": [{"text": {"content": page_title}}]
+            },
+            "Weather": {
+                "rich_text": [{"text": {"content": weather}}]
+            },
+            "Generated Prompt": {
+                "rich_text": [{"text": {"content": prompt}}]
+            }
+        },
+        # 페이지 본문(내용)에 Gemini가 쓴 가사를 텍스트 블록으로 넣습니다.
+        "children": [
+            {
+                "object": "block",
+                "type": "heading_2",
+                "heading_2": {
+                    "rich_text": [{"type": "text", "text": {"content": "🎶 Gemini 생성 가사"}}]
+                }
+            },
+            {
+                "object": "block",
+                "type": "paragraph",
+                "paragraph": {
+                    "rich_text": [{"type": "text", "text": {"content": lyrics}}]
+                }
+            }
+        ]
+    }
+
+    response = requests.post('https://api.notion.com/v1/pages', headers=headers, json=data)
+    if response.status_code == 200:
+        print("✅ Notion 데이터베이스에 성공적으로 저장되었습니다!")
+    else:
+        print(f"❌ Notion 저장 실패: {response.status_code} - {response.text}")
+        
 def main():
     try:
         genres = load_data('data/genres.json')
