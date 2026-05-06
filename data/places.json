@@ -1,5 +1,4 @@
-{
-  [
+ [
     "Universe", "Starlight", "Moonlight", "Sunlight", "Cloud", "Rain", "Snow", "Fog", "Wind", "Storm", 
     "Thunder", "Lightning", "Rainbow", "Ocean", "Mountain", "River", "Lake", "Forest", "Desert", "Field", 
     "Valley", "Cave", "Island", "Beach", "City", "Countryside", "Village", "Alley", "Street", "Square", 
@@ -25,4 +24,3 @@
     "Heat_of_the_day", "Stillness_of_the_night", "Morning_fog", "Morning_sea", "Night_sea", "Moonlit_night", "Snowy_night", "Rainy_day", "Sunny_day", "Cloudy_day", 
     "Windy_day", "Stormy_night"
   ]
-}
