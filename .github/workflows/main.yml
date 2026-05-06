@@ -45,4 +45,6 @@ jobs:
           TZ: 'Asia/Seoul' 
           WEATHER_API_KEY: ${{ secrets.WEATHER_API_KEY }} # 이 줄을 추가합니다!
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }} # 🌟 Gemini 열쇠 추가!
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }} # 🌟 추가!
+          NOTION_DATABASE_ID: ${{ secrets.NOTION_DATABASE_ID }} # 🌟 추가!
         run: python main.py
