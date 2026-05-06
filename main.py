@@ -40,7 +40,7 @@ def generate_lyrics_with_gemini(prompt):
     # Gemini 세팅
     genai.configure(api_key=api_key)
     
-  try:
+try:
         # 1. 내 API 키로 당장 사용할 수 있는 모델 목록을 구글 서버에서 모두 가져옵니다.
         available_models = []
         for m in genai.list_models():
