@@ -42,7 +42,7 @@ def generate_lyrics_with_gemini(prompt):
     
     try:
         # 모델 선택 (텍스트 생성에 빠르고 똑똑한 gemini-1.5-flash 모델 사용)
-        model = genai.GenerativeModel('gemini-1.5-flash')
+        model = genai.GenerativeModel('gemini-1.5-flash-latest')
         
         # 저에게 천재 작사가 역할을 부여합니다!
         system_instruction = (
