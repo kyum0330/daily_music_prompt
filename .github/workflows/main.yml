@@ -14,6 +14,10 @@ jobs:
   generate-prompt:
     runs-on: ubuntu-latest
 
+# 🌟 여기에 환경 변수를 추가하여 Node.js 24 버전을 강제로 사용하도록 설정합니다.
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+      
     steps:
       # 1. 우겸님의 GitHub 저장소에 있는 파일들(JSON, main.py 등)을 불러옵니다.
       - name: 저장소 파일 불러오기
