@@ -9,24 +9,40 @@ def load_data(file_path):
     with open(file_path, 'r', encoding='utf-8') as file:
         return json.load(file)
 
+def get_random_item(data):
+    """데이터가 단순 리스트인지, 카테고리형 딕셔너리인지 파악해서 랜덤 추출하는 함수"""
+    if isinstance(data, dict):
+        all_items = []
+        for items_in_category in data.values():
+            all_items.extend(items_in_category)
+        return random.choice(all_items)
+    elif isinstance(data, list):
+        return random.choice(data)
+
 def get_seoul_weather():
-    """현재 서울 날씨를 가져오는 함수 (임시 버전)"""
-    # 실제 날씨를 가져오려면 OpenWeatherMap 등의 API 키가 필요합니다.
-    # 추후 API 키를 발급받으시면 아래 주석을 풀고 사용하시면 됩니다.
-    """
-    api_key = os.environ.get("WEATHER_API_KEY") # GitHub Secrets에서 가져오기
+    """현재 서울 날씨를 가져오는 함수"""
+    # GitHub Secrets에 등록될 API 키를 불러옵니다.
+    api_key = os.environ.get("WEATHER_API_KEY") 
+    
     if api_key:
-        url = f"http://api.openweathermap.org/data/2.5/weather?q=Seoul&appid={api_key}&lang=kr"
-        response = requests.get(url)
-        if response.status_code == 200:
-            data = response.json()
-            return data['weather'][0]['description'] # 예: '맑음', '가벼운 비'
-    """
-    # 현재는 테스트를 위해 임시로 '비 오는'을 반환합니다.
+        try:
+            url = f"http://api.openweathermap.org/data/2.5/weather?q=Seoul&appid={api_key}&lang=kr"
+            response = requests.get(url)
+            if response.status_code == 200:
+                data = response.json()
+                # OpenWeatherMap에서 한국어 날씨 설명(예: '맑음', '튼구름' 등)을 가져옵니다.
+                return data['weather'][0]['description']
+            else:
+                print(f"날씨 API 호출 실패: 상태 코드 {response.status_code}")
+        except Exception as e:
+            print(f"날씨 정보를 가져오는 중 에러 발생: {e}")
+            
+    # API 키가 아직 없거나, 서버 오류로 날씨를 못 가져왔을 때의 임시 기본값입니다.
+    print("⚠️ 날씨 API 키가 설정되지 않았거나 오류가 발생하여 임시 날씨를 사용합니다.")
     return "비 오는"
 
 def main():
-    # 1. 500개의 항목이 담긴 JSON 데이터 불러오기
+    # 1. JSON 데이터 불러오기
     try:
         genres = load_data('data/genres.json')
         times = load_data('data/times.json')
@@ -35,34 +51,31 @@ def main():
         places = load_data('data/places.json')
         emotions2 = load_data('data/emotions2.json')
     except FileNotFoundError as e:
-        print(f"데이터 파일을 찾을 수 없습니다. 경로를 확인해주세요: {e}")
+        print(f"데이터 파일을 찾을 수 없습니다: {e}")
         return
 
-    # 2. 각 리스트에서 무작위로 하나씩 추출하기
-    selected_genre = random.choice(genres)
-    selected_time = random.choice(times)
-    selected_emotion1 = random.choice(emotions1)
-    selected_action = random.choice(actions)
-    selected_place = random.choice(places)
-    selected_emotion2 = random.choice(emotions2)
+    # 2. 무작위 추출하기
+    selected_genre = get_random_item(genres)
+    selected_time = get_random_item(times)
+    selected_emotion1 = get_random_item(emotions1)
+    selected_action = get_random_item(actions)
+    selected_place = get_random_item(places)
+    selected_emotion2 = get_random_item(emotions2)
 
-    # 3. 실시간 정보 가져오기
-    # GitHub Actions에서 시간을 'Asia/Seoul'로 맞췄기 때문에 현재 날짜가 정확히 들어갑니다.
+    # 3. 실시간 정보 가져오기 (날짜 & 날씨)
     current_date = datetime.now().strftime("%Y년 %m월 %d일")
     current_weather = get_seoul_weather()
 
-    # 4. 프롬프트 문장 조합 (우겸님 포맷)
+    # 4. 프롬프트 문장 조합
     final_prompt = (
-        f"노래를 만들기 위해서 아래의 키워드를 바탕으로 가사를 작성해줘.\n"
+        f"글로벌한 유명한 대형 기획사의 작곡,작사가로서 노래를 만드는 입장이에요.\n"
         f"'{selected_genre} 장르의 {current_date} {selected_time}의 "
         f"{selected_emotion1} {selected_action} {selected_place}에서의 "
-        f"{selected_emotion2} {current_weather} 날'의 느낌으로 가사를 작성해줘."
+        f"{selected_emotion2} {current_weather} 날'의 느낌으로 한국어 가사를 작성해줘."
     )
 
     print("✨ 오늘의 자동 생성 음악 프롬프트 ✨")
     print(final_prompt)
-
-    # (이후 단계: 이 final_prompt를 Gemini API에 보내고, 그 결과를 Notion API로 보내는 코드가 여기에 추가될 예정입니다.)
 
 if __name__ == "__main__":
     main()
