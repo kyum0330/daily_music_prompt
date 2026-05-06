@@ -42,4 +42,5 @@ jobs:
       - name: 프롬프트 생성 스크립트 실행
         env:
           TZ: 'Asia/Seoul' 
+          WEATHER_API_KEY: ${{ secrets.WEATHER_API_KEY }} # 이 줄을 추가합니다!
         run: python main.py
