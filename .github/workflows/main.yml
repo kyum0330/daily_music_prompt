@@ -35,7 +35,8 @@ jobs:
           python -m pip install --upgrade pip
           # 나중에 외부 API(날씨, 노션, 제미나이 등) 연동을 위해 requests 라이브러리가 필요합니다.
           pip install requests 
-
+          pip install google-generativeai # 🌟 이 줄을 꼭 추가해 주세요!
+          
       # 4. 실제 파이썬 코드를 실행합니다!
       # 실행될 때 컴퓨터의 시간대(Timezone)를 아예 서울로 맞춰버립니다. 
       # 이렇게 하면 파이썬 코드에서 별도 처리 없이도 KST 기준 00시의 오늘 날짜를 정확히 가져옵니다.
