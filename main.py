@@ -29,7 +29,7 @@ def get_seoul_weather():
                 return data['weather'][0]['description']
         except Exception as e:
             print(f"날씨 정보를 가져오는 중 에러 발생: {e}")
-    return "비 오는"
+    return "날씨 정보가 오류가 생겼음"
 
 def generate_lyrics_with_gemini(prompt):
     api_key = os.environ.get("GEMINI_API_KEY")
@@ -63,7 +63,7 @@ def generate_lyrics_with_gemini(prompt):
                                 "다음 주어진 상황, 장르, 감정, 날씨를 바탕으로 "
                                 "요즘 트렌드에 대해서 한번 조사를 하여, 그에 맞는 분위기를 맞춰야해요."
                                 "독창적이고 음악의 리듬감이 느껴지는 노래 제목과 노래 가사를 작성해주세요."
-                                "이때, 장르와 Tempo 그리고 Intro와 각종 세부사항도 적어주세요.")
+                                "이때, 장르와 Tempo 그리고 Intro와 section과 각종 세부사항도 적어주세요.")
         full_prompt = f"{system_instruction}\n\n[작사 배경]\n{prompt}"
         
         response = model.generate_content(full_prompt)
@@ -137,9 +137,10 @@ def main():
     current_weather = get_seoul_weather()
 
     final_prompt = (
-        f"'{selected_genre} 장르의 {current_date} {selected_time}의 "
-        f"{selected_emotion1} {selected_action} {selected_place}에서의 "
-        f"{selected_emotion2} {current_weather} 날'의 느낌으로 가사를 작성해줘."
+        f"{selected_genre} 장르의 {current_date} {selected_time}의 "
+        f"{selected_emotion1} 한 {selected_action} 하는 {selected_place}에서의 "
+        f"{selected_emotion2} {current_weather} 날'의 느낌으로 가사를 작성해줘요."
+        f"Intro, Chorus, Verse1, Verse2, Bridge, Outro 등으로 구분해서 한곡 완성해주세요."
     )
 
     print(f"\n[1] 생성된 프롬프트: {final_prompt}")
