@@ -105,7 +105,7 @@ def save_to_notion(date_str, genre, weather, prompt, lyrics):
             {"object": "block", "type": "paragraph", "paragraph": {"rich_text": [{"text": {"content": chunk}}]}}
         )
         
-   data = {
+    data = {
         "parent": {"database_id": database_id},
         "properties": {
             "Title": {"title": [{"text": {"content": page_title}}]},
