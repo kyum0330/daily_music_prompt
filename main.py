@@ -112,9 +112,8 @@ def save_to_notion(date_str, genre, weather, prompt, lyrics):
             "Weather": {"rich_text": [{"text": {"content": weather}}]},
             "Generated Prompt": {"rich_text": [{"text": {"content": prompt}}]}
         },
-        "children": children_blocks # 쪼개진 문단들이 모두 들어갑니다!
+        "children": children_blocks
     }
-
     print("🚀 Notion API 호출 중...")
     response = requests.post('https://api.notion.com/v1/pages', headers=headers, json=data)
     
