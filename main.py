@@ -90,17 +90,29 @@ def save_to_notion(date_str, genre, weather, prompt, lyrics):
     }
 
     page_title = f"{date_str} ({genre})"
-    data = {
+
+    # 🌟 핵심 수정: 가사가 아무리 길어도 2000자씩 쪼개서 배열(리스트)에 담습니다.
+    lyric_chunks = [lyrics[i:i+2000] for i in range(0, len(lyrics), 2000)]
+    
+    # 기본 제목 블록 세팅
+    children_blocks = [
+        {"object": "block", "type": "heading_2", "heading_2": {"rich_text": [{"text": {"content": "🎶 Gemini 생성 가사"}}]}}
+    ]
+    
+    # 쪼개진 가사 조각들을 노션의 새로운 문단(paragraph)으로 하나씩 추가합니다.
+    for chunk in lyric_chunks:
+        children_blocks.append(
+            {"object": "block", "type": "paragraph", "paragraph": {"rich_text": [{"text": {"content": chunk}}]}}
+        )
+        
+   data = {
         "parent": {"database_id": database_id},
         "properties": {
             "Title": {"title": [{"text": {"content": page_title}}]},
             "Weather": {"rich_text": [{"text": {"content": weather}}]},
             "Generated Prompt": {"rich_text": [{"text": {"content": prompt}}]}
         },
-        "children": [
-            {"object": "block", "type": "heading_2", "heading_2": {"rich_text": [{"text": {"content": "🎶 Gemini 생성 가사"}}]}},
-            {"object": "block", "type": "paragraph", "paragraph": {"rich_text": [{"text": {"content": lyrics[:2000]}}]}} # 노션 글자수 제한 방지
-        ]
+        "children": children_blocks # 쪼개진 문단들이 모두 들어갑니다!
     }
 
     print("🚀 Notion API 호출 중...")
