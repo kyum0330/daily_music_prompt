@@ -58,7 +58,7 @@ def generate_lyrics_with_gemini(prompt):
         if not target_model:
             return "⚠️ 텍스트 생성을 지원하는 모델을 찾지 못했습니다."
             
-      model = genai.GenerativeModel(target_model)
+        model = genai.GenerativeModel(target_model)
         
         # 큰따옴표 3개(""")를 사용하면 작성한 줄바꿈과 포맷이 제미나이에게 그대로 전달됩니다.
        system_instruction = """너는 감성을 자극하는 세계적인 엔터테인먼트 음반 회사의 천재적인 작사가에요.
