@@ -63,7 +63,9 @@ def generate_lyrics_with_gemini(prompt):
                                 "다음 주어진 상황, 장르, 감정, 날씨를 바탕으로 "
                                 "요즘 트렌드에 대해서 한번 조사를 하여, 그에 맞는 분위기를 맞춰야해요."
                                 "독창적이고 음악의 리듬감이 느껴지는 노래 제목과 노래 가사를 작성해주세요."
-                                "이때, 장르와 Tempo 그리고 Intro와 section과 각종 세부사항도 적어주세요.")
+                                "이때, 장르와 Tempo 그리고 Intro와 section과 각종 세부사항도 적어주세요."
+                                "노래 정보를 적어줄 때 각 항목들 제목에 **은 표기 안해주면 좋겠어요."
+                                "노래 제목(Subject),장르(Genre),Tempo,Key,악기 구성(Instrument composition)으로 노래 정보는 정리해주세ㅔ요." )
         full_prompt = f"{system_instruction}\n\n[작사 배경]\n{prompt}"
         
         response = model.generate_content(full_prompt)
@@ -72,12 +74,9 @@ def generate_lyrics_with_gemini(prompt):
         return f"Gemini API 호출 중 에러 발생: {e}"
 
 def save_to_notion(date_str, genre, weather, prompt, lyrics):
-    """노션 저장 및 상세 결과 출력 함수"""
+    """노션 저장 함수 (문단 단위 스마트 쪼개기 적용)"""
     notion_token = os.environ.get("NOTION_TOKEN")
     database_id = os.environ.get("NOTION_DATABASE_ID")
-
-    print(f"🔍 [디버그] 노션 토큰 존재 여부: {'Yes' if notion_token else 'No'}")
-    print(f"🔍 [디버그] 데이터베이스 ID 존재 여부: {'Yes' if database_id else 'No'}")
 
     if not notion_token or not database_id:
         print("❌ Notion 토큰이나 데이터베이스 ID 설정이 누락되었습니다.")
@@ -90,21 +89,42 @@ def save_to_notion(date_str, genre, weather, prompt, lyrics):
     }
 
     page_title = f"{date_str} ({genre})"
-
-    # 🌟 핵심 수정: 가사가 아무리 길어도 2000자씩 쪼개서 배열(리스트)에 담습니다.
-    lyric_chunks = [lyrics[i:i+2000] for i in range(0, len(lyrics), 2000)]
     
     # 기본 제목 블록 세팅
     children_blocks = [
         {"object": "block", "type": "heading_2", "heading_2": {"rich_text": [{"text": {"content": "🎶 Gemini 생성 가사"}}]}}
     ]
     
-    # 쪼개진 가사 조각들을 노션의 새로운 문단(paragraph)으로 하나씩 추가합니다.
-    for chunk in lyric_chunks:
-        children_blocks.append(
-            {"object": "block", "type": "paragraph", "paragraph": {"rich_text": [{"text": {"content": chunk}}]}}
-        )
-        
+    # 🌟 핵심 로직: 엔터 두 번(\n\n)을 기준으로 파트/문단을 나눕니다.
+    paragraphs = lyrics.split('\n\n')
+    
+    for para in paragraphs:
+        para = para.strip() # 앞뒤 쓸데없는 공백 제거
+        if not para:
+            continue # 내용이 없는 빈 문단은 건너뜀
+            
+        # 안전장치: 혹시라도 한 문단이 2000자를 넘으면 단어가 안 잘리게 안전하게 쪼갬
+        if len(para) > 2000:
+            # 2000자 이내의 가장 가까운 줄바꿈(\n)이나 공백을 찾아 끊어주는 스마트 슬라이싱
+            while len(para) > 2000:
+                split_idx = para.rfind('\n', 0, 2000)
+                if split_idx == -1:
+                    split_idx = para.rfind(' ', 0, 2000)
+                if split_idx == -1:
+                    split_idx = 2000 # 공백도 없으면 어쩔 수 없이 2000자에서 커팅
+                
+                chunk = para[:split_idx].strip()
+                children_blocks.append(
+                    {"object": "block", "type": "paragraph", "paragraph": {"rich_text": [{"text": {"content": chunk}}]}}
+                )
+                para = para[split_idx:].strip()
+                
+        # 일반적인 경우: 나누어진 파트 그대로 하나의 노션 문단 블록으로 쏙!
+        if para:
+            children_blocks.append(
+                {"object": "block", "type": "paragraph", "paragraph": {"rich_text": [{"text": {"content": para}}]}}
+            )
+
     data = {
         "parent": {"database_id": database_id},
         "properties": {
@@ -114,17 +134,16 @@ def save_to_notion(date_str, genre, weather, prompt, lyrics):
         },
         "children": children_blocks
     }
+
     print("🚀 Notion API 호출 중...")
     response = requests.post('https://api.notion.com/v1/pages', headers=headers, json=data)
     
-    # 상세 결과 출력
     print(f"📊 [결과] HTTP 상태 코드: {response.status_code}")
     if response.status_code == 200:
         print("✅ Notion 저장 성공!")
-        print(f"🔗 생성된 페이지 URL: {response.json().get('url')}")
     else:
         print(f"❌ Notion 저장 실패! 상세 사유: {response.text}")
-
+        
 def main():
     try:
         genres = load_data('data/genres.json')
