@@ -58,14 +58,26 @@ def generate_lyrics_with_gemini(prompt):
         if not target_model:
             return "⚠️ 텍스트 생성을 지원하는 모델을 찾지 못했습니다."
             
-        model = genai.GenerativeModel(target_model)
-        system_instruction = ("너는 감성을 자극하는 세계적인 엔터테이먼트 음반 회사의 천재적인 작사가야. 가사를 작성해줘."
-                                "다음 주어진 상황, 장르, 감정, 날씨를 바탕으로 "
-                                "요즘 트렌드에 대해서 한번 조사를 하여, 그에 맞는 분위기를 맞춰야해요."
-                                "독창적이고 음악의 리듬감이 느껴지는 노래 제목과 노래 가사를 작성해주세요."
-                                "이때, 장르와 Tempo 그리고 Intro와 section과 각종 세부사항도 적어주세요."
-                                "노래 정보를 적어줄 때 각 항목들 제목에 **은 표기 안해주면 좋겠어요."
-                                "노래 제목(Subject),장르(Genre),Tempo,Key,악기 구성(Instrument composition)으로 노래 정보는 정리해주세ㅔ요." )
+      model = genai.GenerativeModel(target_model)
+        
+        # 큰따옴표 3개(""")를 사용하면 작성한 줄바꿈과 포맷이 제미나이에게 그대로 전달됩니다.
+        system_instruction = """너는 감성을 자극하는 세계적인 엔터테인먼트 음반 회사의 천재적인 작사가에요.
+                                독창적이고 음악의 리듬감이 느껴지는 노래 제목과 노래 가사가 필요해요.
+                                다음 주어진 상황, 장르, 감정, 날씨를 바탕으로 
+                                요즘 트렌드를 조사하여 그에 맞는 분위기로 작사를 하고, 
+                                그 분위기가 어떤 내용인지 세부 내용으로 알려주세요.
+                                이때, 장르와 Tempo 그리고 Intro와 section과 각종 세부사항(시간,악기 및 분위기 구성)도 적어주세요.
+
+                                [출력 및 포맷 규칙]
+                                1. 노래 정보를 적어줄 때 각 항목 제목에 마크다운 굵게 표기(**)는 절대 사용하지 마세요.
+                                2. 노래 정보는 반드시 아래의 양식으로 정리해줘.
+
+                                노래 제목(Subject) : 
+                                장르(Genre) : 
+                                Tempo : 
+                                Key : 
+                                악기 구성(Instrument composition) : """
+
         full_prompt = f"{system_instruction}\n\n[작사 배경]\n{prompt}"
         
         response = model.generate_content(full_prompt)
