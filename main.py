@@ -61,7 +61,7 @@ def generate_lyrics_with_gemini(prompt):
         model = genai.GenerativeModel(target_model)
         
         # 큰따옴표 3개(""")를 사용하면 작성한 줄바꿈과 포맷이 제미나이에게 그대로 전달됩니다.
-       system_instruction = """너는 감성을 자극하는 세계적인 엔터테인먼트 음반 회사의 천재적인 작사가에요.
+        system_instruction = """너는 감성을 자극하는 세계적인 엔터테인먼트 음반 회사의 천재적인 작사가에요.
 독창적이고 음악의 리듬감이 느껴지는 노래 제목과 노래 가사가 필요해요.
 다음 주어진 상황, 장르, 감정, 날씨를 바탕으로 
 요즘 트렌드를 조사하여 그에 맞는 분위기로 작사를 하고, 
