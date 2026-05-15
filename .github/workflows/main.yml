@@ -3,9 +3,8 @@ name: Daily Music Prompt Generator
 # 언제 실행할지 설정하는 부분입니다.
 on:
   schedule:
-    # cron: '분 시 일 월 요일' 순서입니다.
-    # UTC 기준 15:00 = 한국 시간(KST) 00:00 입니다.
-    - cron: '0 15 * * *'
+    # 🌟 매 1시간마다(매시 정각에) 실행되도록 변경했습니다.
+    - cron: '0 * * * *'
   
   # 원할 때 웹에서 수동으로 버튼을 눌러 바로 실행해 볼 수 있게 해주는 옵션입니다.
   workflow_dispatch:
@@ -29,7 +28,7 @@ jobs:
         with:
           python-version: '3.10'
 
-      # 3. 파이썬 실행에 필요한 외부 라이브러리(패키지)를 설치합니다. (추후 날씨 API 등 사용 위해)
+      # 3. 파이썬 실행에 필요한 외부 라이브러리(패키지)를 설치합니다.
       - name: 필요한 패키지 설치하기
         run: |
           python -m pip install --upgrade pip
@@ -39,12 +38,12 @@ jobs:
           
       # 4. 실제 파이썬 코드를 실행합니다!
       # 실행될 때 컴퓨터의 시간대(Timezone)를 아예 서울로 맞춰버립니다. 
-      # 이렇게 하면 파이썬 코드에서 별도 처리 없이도 KST 기준 00시의 오늘 날짜를 정확히 가져옵니다.
+      # 이렇게 하면 파이썬 코드에서 별도 처리 없이도 KST 기준 오늘 날짜를 정확히 가져옵니다.
       - name: 프롬프트 생성 스크립트 실행
         env:
           TZ: 'Asia/Seoul' 
-          WEATHER_API_KEY: ${{ secrets.WEATHER_API_KEY }} # 이 줄을 추가합니다!
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }} # 🌟 Gemini 열쇠 추가!
-          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }} # 🌟 추가!
-          NOTION_DATABASE_ID: ${{ secrets.NOTION_DATABASE_ID }} # 🌟 추가!
+          WEATHER_API_KEY: ${{ secrets.WEATHER_API_KEY }} 
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }} 
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }} 
+          NOTION_DATABASE_ID: ${{ secrets.NOTION_DATABASE_ID }} 
         run: python main.py
