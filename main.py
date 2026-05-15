@@ -184,10 +184,13 @@ def main():
 
     print(f"\n[1] 생성된 프롬프트: {final_prompt}")
     print("\n[2] Gemini 가사 생성 중...")
-    lyrics = generate_lyrics_with_gemini(final_prompt)
+    
+   # 🌟 수정 포인트 1: 이제 가사뿐만 아니라 5개 정보가 묶인 바구니를 받으므로 이름을 result_data로 바꿨습니다.
+    result_data = generate_lyrics_with_gemini(final_prompt)
     
     print("\n[3] Notion 저장 시도...")
-    save_to_notion(current_date, selected_genre, current_weather, final_prompt, lyrics)
+    # 🌟 수정 포인트 2: 노션 저장 함수에 그 바구니(result_data)를 통째로 넘겨줍니다.
+    save_to_notion(current_date, selected_genre, current_weather, final_prompt, result_data)
 
 if __name__ == "__main__":
     main()
