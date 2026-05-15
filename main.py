@@ -46,8 +46,7 @@ def generate_lyrics_with_gemini(prompt):
             
         model = genai.GenerativeModel(target_model)
         
-        # 🌟 우겸님의 새로운 구조 요청 사항을 완벽 반영한 프롬프트
-        # 큰따옴표 3개(""")를 사용하면 작성한 줄바꿈과 포맷이 제미나이에게 그대로 전달됩니다.
+        # 🌟 큰따옴표 3개(""")로 시작하여, 맨 마지막 보컬 이펙트가 끝날 때까지 닫지 않습니다!
         system_instruction = """너는 감성을 자극하는 세계적인 엔터테인먼트 음반 회사의 천재적인 작사가에요.
 요즘 트렌드를 조사한 후에, 다음 주어진 상황, 장르, 감정, 날씨를 바탕으로 독창적이고 음악의 리듬감이 느껴지는 노래 제목과 노래 가사를 만들어주세요.
 
@@ -65,8 +64,8 @@ def generate_lyrics_with_gemini(prompt):
 2. 클린 가사: 위 세부 항목이 끝난 후, 단을 나누어 순수 가사 내용만 다시 한 번 적어주세요.
 
 ###TAG###
-이 곡과 어울리는 유튜브 노출용 트렌디 해쉬태그를 이용해서 한글과 영어 섞어서 정확히 30개 작성해줘요. 이때 번갈아가며 나오도록 하고, 해당 태크마다','를 붙여주고, 노출 가능성이 큰 순서대로 나열해주세요. (예: #하우스, #새벽감성, ...)"""
- 
+이 곡과 어울리는 유튜브 노출용 트렌디 해쉬태그를 이용해서 한글과 영어 섞어서 정확히 30개 작성해줘요. 이때 번갈아가며 나오도록 하고, 해당 태크마다','를 붙여주고, 노출 가능성이 큰 순서대로 나열해주세요. (예: #하우스, #새벽감성, ...)
+
 ###UPLOAD###
 유튜브 업로드용 요약 양식으로 작성해주세요. 
 형식: [해쉬태그 5개] + [날짜와 감정 기반 짧은 소개글(한글)] + [날짜와 감정 기반 짧은 한글 소개글 영어로 번역] [곡 정보 요약(제목, 장르, Tempo, Key, 악기)] 순서로 가독성 있게 작성해줘요.
@@ -88,12 +87,11 @@ Based on the feeling of 'Rough and Stopped Canvas on an Endless Clear Day' on Ma
 
 * 악기 구성(Instrument composition) : 웜하고 몽환적인 신스 패드, 리드미컬한 베이스라인, 섬세한 하이햇과 킥 드럼, 아르페지오 신스, 이모셔널한 신스 리드, 미니멀한 보컬 이펙트."""
 
-
         full_prompt = f"{system_instruction}\n\n[작사 배경]\n{prompt}"
         response = model.generate_content(full_prompt)
-        return response.text
+        text = response.text
 
-# 🌟 5개 섹션 파싱 로직
+        # 🌟 5개 섹션 파싱 로직
         extracted = {"detail": "", "purpose": "", "lyrics": "", "tag": "", "upload": ""}
         parts = text.split("###")
         for p in parts:
@@ -105,7 +103,7 @@ Based on the feeling of 'Rough and Stopped Canvas on an Endless Clear Day' on Ma
             elif p.startswith("UPLOAD"): extracted["upload"] = p.replace("UPLOAD", "").strip()
         
         return extracted
-        
+    
     except Exception as e:
         print(f"Gemini 에러: {e}")
         return {}
@@ -124,7 +122,7 @@ def save_to_notion(date_str, genre, weather, prompt, data_dict):
 
     page_title = f"{date_str} ({genre})"
     
-children_blocks = [{"object": "block", "type": "heading_2", "heading_2": {"rich_text": [{"text": {"content": "🎶 Gemini 생성 가사 및 곡 구성"}}]}}]
+    children_blocks = [{"object": "block", "type": "heading_2", "heading_2": {"rich_text": [{"text": {"content": "🎶 Gemini 생성 가사 및 곡 구성"}}]}}]
     for para in data_dict["lyrics"].split('\n\n'):
         if para.strip():
             children_blocks.append({"object": "block", "type": "paragraph", "paragraph": {"rich_text": [{"text": {"content": para.strip()[:2000]}}]}})
@@ -132,7 +130,7 @@ children_blocks = [{"object": "block", "type": "heading_2", "heading_2": {"rich_
     children_blocks.append({"object": "block", "type": "divider"})
     children_blocks.append({"object": "block", "type": "paragraph", "paragraph": {"rich_text": [{"text": {"content": data_dict["tag"][:2000]}}]}})
 
-    # 🌟 노션 Upload 속성 매핑 추가
+    # 🌟 노션 Upload 속성 매핑 
     payload = {
         "parent": {"database_id": database_id},
         "properties": {
@@ -143,7 +141,7 @@ children_blocks = [{"object": "block", "type": "heading_2", "heading_2": {"rich_
             "Purpose": {"rich_text": [{"text": {"content": data_dict["purpose"][:2000]}}]},
             "Tag": {"rich_text": [{"text": {"content": data_dict["tag"][:2000]}}]},
             "Genre": {"rich_text": [{"text": {"content": genre}}]},
-            "Upload": {"rich_text": [{"text": {"content": data_dict["upload"][:2000]}}]} # 👈 추가된 부분
+            "Upload": {"rich_text": [{"text": {"content": data_dict["upload"][:2000]}}]} 
         },
         "children": children_blocks
     }
@@ -188,11 +186,9 @@ def main():
     print(f"\n[1] 생성된 프롬프트: {final_prompt}")
     print("\n[2] Gemini 가사 생성 중...")
     
-   # 🌟 수정 포인트 1: 이제 가사뿐만 아니라 5개 정보가 묶인 바구니를 받으므로 이름을 result_data로 바꿨습니다.
     result_data = generate_lyrics_with_gemini(final_prompt)
     
     print("\n[3] Notion 저장 시도...")
-    # 🌟 수정 포인트 2: 노션 저장 함수에 그 바구니(result_data)를 통째로 넘겨줍니다.
     save_to_notion(current_date, selected_genre, current_weather, final_prompt, result_data)
 
 if __name__ == "__main__":
