@@ -46,7 +46,6 @@ def generate_lyrics_with_gemini(prompt):
             
         model = genai.GenerativeModel(target_model)
         
-        # 🌟 큰따옴표 3개(""")로 시작! (여기서부터 문장이 시작됩니다)
         system_instruction = """너는 감성을 자극하는 세계적인 엔터테인먼트 음반 회사의 천재적인 작사가에요.
 요즘 트렌드를 조사한 후에, 다음 주어진 상황, 장르, 감정, 날씨를 바탕으로 독창적이고 음악의 리듬감이 느껴지는 노래 제목과 노래 가사를 만들어주세요.
 
@@ -86,13 +85,11 @@ Based on the feeling of 'Rough and Stopped Canvas on an Endless Clear Day' on Ma
 * Key : E Major, 내면의 고요한 성찰에서 시작해 벅찬 해방감으로 뻗어나가는 맑고 투명한 희망을 담기 위함.
 
 * 악기 구성(Instrument composition) : 웜하고 몽환적인 신스 패드, 리드미컬한 베이스라인, 섬세한 하이햇과 킥 드럼, 아르페지오 신스, 이모셔널한 신스 리드, 미니멀한 보컬 이펙트."""
-        # 🌟 큰따옴표 3개(""") 끝! (여기에만 있어야 합니다!)
 
         full_prompt = f"{system_instruction}\n\n[작사 배경]\n{prompt}"
         response = model.generate_content(full_prompt)
         text = response.text
 
-        # 🌟 5개 섹션 파싱 로직
         extracted = {"detail": "", "purpose": "", "lyrics": "", "tag": "", "upload": ""}
         parts = text.split("###")
         for p in parts:
@@ -100,97 +97,4 @@ Based on the feeling of 'Rough and Stopped Canvas on an Endless Clear Day' on Ma
             if p.startswith("DETAIL"): extracted["detail"] = p.replace("DETAIL", "").strip()
             elif p.startswith("PURPOSE"): extracted["purpose"] = p.replace("PURPOSE", "").strip()
             elif p.startswith("LYRICS"): extracted["lyrics"] = p.replace("LYRICS", "").strip()
-            elif p.startswith("TAG"): extracted["tag"] = p.replace("TAG", "").strip()
-            elif p.startswith("UPLOAD"): extracted["upload"] = p.replace("UPLOAD", "").strip()
-        
-        return extracted
-        
-    except Exception as e:
-        print(f"Gemini 에러: {e}")
-        return {}
-
-def save_to_notion(date_str, genre, weather, prompt, data_dict):
-    notion_token = os.environ.get("NOTION_TOKEN")
-    database_id = os.environ.get("NOTION_DATABASE_ID")
-    if not notion_token or not database_id or not data_dict: 
-        return
-
-    headers = {
-        "Authorization": f"Bearer {notion_token}",
-        "Content-Type": "application/json",
-        "Notion-Version": "2022-06-28"
-    }
-
-    page_title = f"{date_str} ({genre})"
-    
-    children_blocks = [{"object": "block", "type": "heading_2", "heading_2": {"rich_text": [{"text": {"content": "🎶 Gemini 생성 가사 및 곡 구성"}}]}}]
-    for para in data_dict["lyrics"].split('\n\n'):
-        if para.strip():
-            children_blocks.append({"object": "block", "type": "paragraph", "paragraph": {"rich_text": [{"text": {"content": para.strip()[:2000]}}]}})
-    
-    children_blocks.append({"object": "block", "type": "divider"})
-    children_blocks.append({"object": "block", "type": "paragraph", "paragraph": {"rich_text": [{"text": {"content": data_dict["tag"][:2000]}}]}})
-
-    # 🌟 노션 Upload 속성 매핑 추가
-    payload = {
-        "parent": {"database_id": database_id},
-        "properties": {
-            "Title": {"title": [{"text": {"content": f"{date_str} ({genre})"}}]},
-            "Weather": {"rich_text": [{"text": {"content": weather}}]},
-            "Generated Prompt": {"rich_text": [{"text": {"content": prompt}}]},
-            "Detail": {"rich_text": [{"text": {"content": data_dict["detail"][:2000]}}]},
-            "Purpose": {"rich_text": [{"text": {"content": data_dict["purpose"][:2000]}}]},
-            "Tag": {"rich_text": [{"text": {"content": data_dict["tag"][:2000]}}]},
-            "Genre": {"rich_text": [{"text": {"content": genre}}]},
-            "Upload": {"rich_text": [{"text": {"content": data_dict["upload"][:2000]}}]} 
-        },
-        "children": children_blocks
-    }
-    
-    response = requests.post('https://api.notion.com/v1/pages', headers=headers, json=payload)
-    
-    print(f"📊 [결과] HTTP 상태 코드: {response.status_code}")
-    if response.status_code == 200:
-        print("✅ Notion 저장 성공!")
-    else:
-        print(f"❌ Notion 저장 실패! 상세 사유: {response.text}")
-        
-def main():
-    try:
-        genres = load_data('data/genres.json')
-        times = load_data('data/times.json')
-        emotions1 = load_data('data/emotions1.json')
-        actions = load_data('data/actions.json')
-        places = load_data('data/places.json')
-        emotions2 = load_data('data/emotions2.json')
-    except Exception as e:
-        print(f"데이터 로드 실패: {e}")
-        return
-
-    selected_genre = get_random_item(genres)
-    selected_time = get_random_item(times)
-    selected_emotion1 = get_random_item(emotions1)
-    selected_action = get_random_item(actions)
-    selected_place = get_random_item(places)
-    selected_emotion2 = get_random_item(emotions2)
-
-    current_date = datetime.now().strftime("%Y년 %m월 %d일")
-    current_weather = get_seoul_weather()
-
-    final_prompt = (
-        f"{selected_genre} 장르의 {current_date} {selected_time}의 "
-        f"{selected_emotion1} 한 {selected_action} 하는 {selected_place}에서의 "
-        f"{selected_emotion2} {current_weather} 날'의 느낌으로 가사를 작성해줘요."
-        f"Intro, Chorus, Verse1, Verse2, Bridge, Outro 등으로 구분해서 한곡 완성해주세요."
-    )
-
-    print(f"\n[1] 생성된 프롬프트: {final_prompt}")
-    print("\n[2] Gemini 가사 생성 중...")
-    
-    result_data = generate_lyrics_with_gemini(final_prompt)
-    
-    print("\n[3] Notion 저장 시도...")
-    save_to_notion(current_date, selected_genre, current_weather, final_prompt, result_data)
-
-if __name__ == "__main__":
-    main()
+            elif p.startswith("
