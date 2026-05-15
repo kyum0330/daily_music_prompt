@@ -1,6 +1,7 @@
 import json
 import random
 import os
+import re  # 🌟 정규표현식(강력한 텍스트 추출) 라이브러리 추가
 from datetime import datetime
 import requests
 import google.generativeai as genai
@@ -90,15 +91,31 @@ Based on the feeling of 'Rough and Stopped Canvas on an Endless Clear Day' on Ma
         response = model.generate_content(full_prompt)
         text = response.text
 
+        # 🌟 파싱 로직 완벽 수정본: 정규표현식으로 알맹이만 100% 쏙쏙 빼냅니다!
+        text = re.sub(r'###\s*DETAIL\s*###', '###DETAIL###', text, flags=re.IGNORECASE)
+        text = re.sub(r'###\s*PURPOSE\s*###', '###PURPOSE###', text, flags=re.IGNORECASE)
+        text = re.sub(r'###\s*LYRICS\s*###', '###LYRICS###', text, flags=re.IGNORECASE)
+        text = re.sub(r'###\s*TAG\s*###', '###TAG###', text, flags=re.IGNORECASE)
+        text = re.sub(r'###\s*UPLOAD\s*###', '###UPLOAD###', text, flags=re.IGNORECASE)
+
+        markers = ["###DETAIL###", "###PURPOSE###", "###LYRICS###", "###TAG###", "###UPLOAD###"]
         extracted = {"detail": "", "purpose": "", "lyrics": "", "tag": "", "upload": ""}
-        parts = text.split("###")
-        for p in parts:
-            p = p.strip()
-            if p.startswith("DETAIL"): extracted["detail"] = p.replace("DETAIL", "").strip()
-            elif p.startswith("PURPOSE"): extracted["purpose"] = p.replace("PURPOSE", "").strip()
-            elif p.startswith("LYRICS"): extracted["lyrics"] = p.replace("LYRICS", "").strip()
-            elif p.startswith("TAG"): extracted["tag"] = p.replace("TAG", "").strip()
-            elif p.startswith("UPLOAD"): extracted["upload"] = p.replace("UPLOAD", "").strip()
+
+        for marker in markers:
+            if marker in text:
+                # 1. 해당 마커 기준으로 텍스트를 자르고 뒷부분(알맹이)을 가져옴
+                part = text.split(marker)[1]
+                
+                # 2. 가져온 알맹이에서 '다음 마커'가 등장하기 전까지만 안전하게 다시 자름
+                min_idx = len(part)
+                for other_marker in markers:
+                    idx = part.find(other_marker)
+                    if idx != -1 and idx < min_idx:
+                        min_idx = idx
+                
+                # 3. 바구니에 저장
+                key = marker.replace("#", "").lower()
+                extracted[key] = part[:min_idx].strip()
         
         return extracted
         
@@ -109,7 +126,10 @@ Based on the feeling of 'Rough and Stopped Canvas on an Endless Clear Day' on Ma
 def save_to_notion(date_str, genre, weather, prompt, data_dict):
     notion_token = os.environ.get("NOTION_TOKEN")
     database_id = os.environ.get("NOTION_DATABASE_ID")
-    if not notion_token or not database_id or not data_dict: 
+    
+    # 데이터가 비어있으면 아예 저장을 시도하지 않음
+    if not notion_token or not database_id or not data_dict.get("lyrics"): 
+        print("❌ 저장할 가사(데이터)가 비어있어 Notion 호출을 취소합니다.")
         return
 
     headers = {
@@ -121,9 +141,24 @@ def save_to_notion(date_str, genre, weather, prompt, data_dict):
     page_title = f"{date_str} ({genre})"
     
     children_blocks = [{"object": "block", "type": "heading_2", "heading_2": {"rich_text": [{"text": {"content": "🎶 Gemini 생성 가사 및 곡 구성"}}]}}]
+    
+    # 가사가 너무 길어질 경우를 대비한 안전 장치 복구
     for para in data_dict["lyrics"].split('\n\n'):
-        if para.strip():
-            children_blocks.append({"object": "block", "type": "paragraph", "paragraph": {"rich_text": [{"text": {"content": para.strip()[:2000]}}]}})
+        para = para.strip()
+        if not para: continue
+        
+        if len(para) > 2000:
+            while len(para) > 2000:
+                split_idx = para.rfind('\n', 0, 2000)
+                if split_idx == -1: split_idx = para.rfind(' ', 0, 2000)
+                if split_idx == -1: split_idx = 2000 
+                
+                chunk = para[:split_idx].strip()
+                children_blocks.append({"object": "block", "type": "paragraph", "paragraph": {"rich_text": [{"text": {"content": chunk}}]}})
+                para = para[split_idx:].strip()
+                
+        if para:
+            children_blocks.append({"object": "block", "type": "paragraph", "paragraph": {"rich_text": [{"text": {"content": para}}]}})
     
     children_blocks.append({"object": "block", "type": "divider", "divider": {}})
     children_blocks.append({"object": "block", "type": "paragraph", "paragraph": {"rich_text": [{"text": {"content": data_dict["tag"][:2000]}}]}})
@@ -147,7 +182,7 @@ def save_to_notion(date_str, genre, weather, prompt, data_dict):
     
     print(f"📊 [결과] HTTP 상태 코드: {response.status_code}")
     if response.status_code == 200:
-        print("✅ Notion 저장 성공!")
+        print("✅ Notion 저장 성공! 모든 데이터가 들어갔습니다.")
     else:
         print(f"❌ Notion 저장 실패! 상세 사유: {response.text}")
         
