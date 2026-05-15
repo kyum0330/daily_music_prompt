@@ -34,11 +34,11 @@ def get_seoul_weather():
 def generate_lyrics_with_gemini(prompt):
     api_key = os.environ.get("GEMINI_API_KEY")
     if not api_key:
-        return "⚠️ GEMINI_API_KEY가 설정되지 않아 가사를 생성할 수 없습니다."
+        return {}
     
     genai.configure(api_key=api_key)
     
-try:
+    try:
         available_models = [m.name for m in genai.list_models() if 'generateContent' in m.supported_generation_methods]
         target_model = next((name for name in available_models if 'gemini-1.5-flash' in name), available_models[0] if available_models else None)
         
@@ -69,7 +69,7 @@ try:
  
 ###UPLOAD###
 유튜브 업로드용 요약 양식으로 작성해주세요. 
-형식: [해쉬태그 5개] + [날짜와 감정 기반 짧은 소개글(한글)] + [날짜와 감정 기반 짧은 한글 소개글 영어로 번역] [곡 정보 요약(제목, 장르, Tempo, Key, 악기)] 순서로 가독성 있게 작성해줘."""
+형식: [해쉬태그 5개] + [날짜와 감정 기반 짧은 소개글(한글)] + [날짜와 감정 기반 짧은 한글 소개글 영어로 번역] [곡 정보 요약(제목, 장르, Tempo, Key, 악기)] 순서로 가독성 있게 작성해줘요.
 UPLOAD용 형식 예시는 다음과 같아요.
 
 #감성 #playlist #인디  #멜로딕일렉트로닉 #프로그레시브하우스
@@ -86,7 +86,7 @@ Based on the feeling of 'Rough and Stopped Canvas on an Endless Clear Day' on Ma
 
 * Key : E Major, 내면의 고요한 성찰에서 시작해 벅찬 해방감으로 뻗어나가는 맑고 투명한 희망을 담기 위함.
 
-* 악기 구성(Instrument composition) : 웜하고 몽환적인 신스 패드, 리드미컬한 베이스라인, 섬세한 하이햇과 킥 드럼, 아르페지오 신스, 이모셔널한 신스 리드, 미니멀한 보컬 이펙트.
+* 악기 구성(Instrument composition) : 웜하고 몽환적인 신스 패드, 리드미컬한 베이스라인, 섬세한 하이햇과 킥 드럼, 아르페지오 신스, 이모셔널한 신스 리드, 미니멀한 보컬 이펙트. """
 
 
         full_prompt = f"{system_instruction}\n\n[작사 배경]\n{prompt}"
@@ -105,13 +105,16 @@ Based on the feeling of 'Rough and Stopped Canvas on an Endless Clear Day' on Ma
             elif p.startswith("UPLOAD"): extracted["upload"] = p.replace("UPLOAD", "").strip()
         
         return extracted
+        
     except Exception as e:
-        print(f"Gemini 에러: {e}"); return {}
+        print(f"Gemini 에러: {e}")
+        return {}
 
 def save_to_notion(date_str, genre, weather, prompt, data_dict):
     notion_token = os.environ.get("NOTION_TOKEN")
     database_id = os.environ.get("NOTION_DATABASE_ID")
-    if not notion_token or not database_id or not data_dict: return
+    if not notion_token or not database_id or not data_dict: 
+        return
 
     headers = {
         "Authorization": f"Bearer {notion_token}",
@@ -145,7 +148,7 @@ children_blocks = [{"object": "block", "type": "heading_2", "heading_2": {"rich_
         "children": children_blocks
     }
     
-    response = requests.post('https://api.notion.com/v1/pages', headers=headers, json=data)
+    response = requests.post('https://api.notion.com/v1/pages', headers=headers, json=payload)
     
     print(f"📊 [결과] HTTP 상태 코드: {response.status_code}")
     if response.status_code == 200:
