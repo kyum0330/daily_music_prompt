@@ -46,7 +46,7 @@ def generate_lyrics_with_gemini(prompt):
             
         model = genai.GenerativeModel(target_model)
         
-        # 🌟 큰따옴표 3개(""")로 시작하여, 맨 마지막 보컬 이펙트가 끝날 때까지 닫지 않습니다!
+        # 🌟 큰따옴표 3개(""")로 시작! (여기서부터 문장이 시작됩니다)
         system_instruction = """너는 감성을 자극하는 세계적인 엔터테인먼트 음반 회사의 천재적인 작사가에요.
 요즘 트렌드를 조사한 후에, 다음 주어진 상황, 장르, 감정, 날씨를 바탕으로 독창적이고 음악의 리듬감이 느껴지는 노래 제목과 노래 가사를 만들어주세요.
 
@@ -86,6 +86,7 @@ Based on the feeling of 'Rough and Stopped Canvas on an Endless Clear Day' on Ma
 * Key : E Major, 내면의 고요한 성찰에서 시작해 벅찬 해방감으로 뻗어나가는 맑고 투명한 희망을 담기 위함.
 
 * 악기 구성(Instrument composition) : 웜하고 몽환적인 신스 패드, 리드미컬한 베이스라인, 섬세한 하이햇과 킥 드럼, 아르페지오 신스, 이모셔널한 신스 리드, 미니멀한 보컬 이펙트."""
+        # 🌟 큰따옴표 3개(""") 끝! (여기에만 있어야 합니다!)
 
         full_prompt = f"{system_instruction}\n\n[작사 배경]\n{prompt}"
         response = model.generate_content(full_prompt)
@@ -103,7 +104,7 @@ Based on the feeling of 'Rough and Stopped Canvas on an Endless Clear Day' on Ma
             elif p.startswith("UPLOAD"): extracted["upload"] = p.replace("UPLOAD", "").strip()
         
         return extracted
-    
+        
     except Exception as e:
         print(f"Gemini 에러: {e}")
         return {}
@@ -130,7 +131,7 @@ def save_to_notion(date_str, genre, weather, prompt, data_dict):
     children_blocks.append({"object": "block", "type": "divider"})
     children_blocks.append({"object": "block", "type": "paragraph", "paragraph": {"rich_text": [{"text": {"content": data_dict["tag"][:2000]}}]}})
 
-    # 🌟 노션 Upload 속성 매핑 
+    # 🌟 노션 Upload 속성 매핑 추가
     payload = {
         "parent": {"database_id": database_id},
         "properties": {
