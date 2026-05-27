@@ -60,7 +60,7 @@ def generate_lyrics_with_gemini(prompt):
 이 칸에는 '작사가의 한마디'를 통해 이 곡의 기획 의도와 종합적인 곡 소개를 적어주세요.
 
 ###SUNO###
-위 DETAIL 부분에 작성한 '장르, Tempo, 악기 구성, 분위기'를 음악 생성 AI(Suno)의 'Style of Music' 란에 바로 복사해 넣을 수 있도록, 영어 키워드 위주로 120자 이내로 번역 및 요약해주세요. (예: Melodic Electronic, Progressive House, 123 BPM, warm synth pad, emotional lead)
+위 DETAIL 부분에 작성한 '장르, Tempo, 악기 구성, 분위기'를 음악 생성 AI(Suno)의 'Style of Music' 란에 바로 복사해 넣을 수 있도록, 영어 키워드 위주로 700자 이내로 번역 및 요약해주세요. (예: Melodic Electronic, Progressive House, 123 BPM, warm synth pad, emotional lead)
 
 ###LYRICS###
 섹션별 가사: Intro, Chorus, Verse, Bridge, Outro 등으로 구분하여 가사를 작성해. 가사 외의 정보(구간 시간, 악기/분위기)는 반드시 영어로 < > 속에 넣어 표현해주세요.
