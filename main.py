@@ -104,7 +104,7 @@ Based on the feeling of 'Rough and Stopped Canvas on an Endless Clear Day' on Ma
         response = model.generate_content(full_prompt)
         text = response.text
 
-        # 🌟 정규표현식 파서 추가
+        # 🌟 강력한 정규표현식: 제미나이가 어떤 특수문자나 띄어쓰기를 섞어놔도 깔끔하게 통일시킵니다.
         markers_base = ["DETAIL", "PURPOSE", "SUNO", "VOCAL", "LYRICS", "CLEAN_LYRICS", "TAG", "UPLOAD"]
         for m in markers_base:
             text = re.sub(r'[*_]*#+\s*' + m + r'\s*#*[*_]*', f'###{m}###', text, flags=re.IGNORECASE)
@@ -122,37 +122,73 @@ Based on the feeling of 'Rough and Stopped Canvas on an Endless Clear Day' on Ma
                         idx = part.find(other_marker)
                         if idx != -1 and idx < min_idx:
                             min_idx = idx
+                
                 key = marker.replace("#", "").lower()
                 extracted[key] = part[:min_idx].strip()
         
-        extracted["image"] = f"[곡 상세 정보]\n{extracted.get('detail', '')}\n\n[기획 의도]\n{extracted.get('purpose', '')}\n\n💡 이에 맞는 16:9 의 영상 제작에 맞는 썸네일 하나 작성 부탁할게요. 이때, 노래에 대한 설명은 글로 표현하지 않아도 되요."
+        extracted["image"] = (
+            f"[곡 상세 정보]\n{extracted.get('detail', '')}\n\n"
+            f"[기획 의도]\n{extracted.get('purpose', '')}\n\n"
+            f"💡 이에 맞는 16:9 의 영상 제작에 맞는 썸네일 하나 작성 부탁할게요. 이때, 노래에 대한 설명은 글로 표현하지 않아도 되요."
+        )
+
+        # 🌟 디버깅 로그 출력: 제미나이가 만든 항목별 글자 수를 GitHub 액션 화면에 보여줍니다.
+        print("\n[4] 파싱된 섹션별 글자 수 (0이면 AI가 생성을 빼먹은 것입니다):")
+        for k, v in extracted.items():
+            print(f" - {k}: {len(v)}자")
 
         return extracted
         
     except Exception as e:
         print(f"Gemini 에러: {e}")
         return {}
-    
+
+# 🌟 가사 쪼개기 도우미 함수를 가장 바깥쪽으로 안전하게 뺐습니다!
+def get_chunks(text):
+    return [{"text": {"content": text[i:i+2000]}} for i in range(0, max(1, len(text)), 2000)]
+
 def save_to_notion(date_str, genre, weather, prompt, data_dict):
     notion_token = os.environ.get("NOTION_TOKEN")
     database_id = os.environ.get("NOTION_DATABASE_ID")
     
-    if not notion_token or not database_id or not data_dict.get("lyrics"): 
+    # 가사가 정말로 비어있다면 아예 전송을 하지 않고 멈춥니다.
+    if not notion_token or not database_id or not data_dict.get("lyrics", "").strip(): 
+        print("❌ 저장할 가사(LYRICS) 데이터가 비어있어 Notion 호출을 취소합니다.")
         return
 
-headers = {"Authorization": f"Bearer {notion_token}", "Content-Type": "application/json", "Notion-Version": "2022-06-28"}
-    
-    # 가사 쪼개기 도우미 함수
-def get_chunks(text):
-        return [{"text": {"content": text[i:i+2000]}} for i in range(0, max(1, len(text)), 2000)]
+    # 🌟 들여쓰기 위치를 올바르게 수정했습니다!
+    headers = {
+        "Authorization": f"Bearer {notion_token}",
+        "Content-Type": "application/json",
+        "Notion-Version": "2022-06-28"
+    }
 
+    page_title = f"{date_str} ({genre})"
+    
     children_blocks = [{"object": "block", "type": "heading_2", "heading_2": {"rich_text": [{"text": {"content": "🎶 Gemini 생성 가사 및 곡 구성"}}]}}]
+    
     for para in data_dict["lyrics"].split('\n\n'):
-        if para.strip():
-            children_blocks.append({"object": "block", "type": "paragraph", "paragraph": {"rich_text": [{"text": {"content": para.strip()[:2000]}}]}})
+        para = para.strip()
+        if not para: continue
+        
+        if len(para) > 2000:
+            while len(para) > 2000:
+                split_idx = para.rfind('\n', 0, 2000)
+                if split_idx == -1: split_idx = para.rfind(' ', 0, 2000)
+                if split_idx == -1: split_idx = 2000 
+                
+                chunk = para[:split_idx].strip()
+                children_blocks.append({"object": "block", "type": "paragraph", "paragraph": {"rich_text": [{"text": {"content": chunk}}]}})
+                para = para[split_idx:].strip()
+                
+        if para:
+            children_blocks.append({"object": "block", "type": "paragraph", "paragraph": {"rich_text": [{"text": {"content": para}}]}})
     
     children_blocks.append({"object": "block", "type": "divider", "divider": {}})
     children_blocks.append({"object": "block", "type": "paragraph", "paragraph": {"rich_text": [{"text": {"content": data_dict.get("tag", "")[:2000]}}]}})
+
+    clean_lyrics_content = data_dict.get("clean_lyrics", "")
+    clean_lyrics_chunks = [{"text": {"content": clean_lyrics_content[i:i+2000]}} for i in range(0, max(1, len(clean_lyrics_content)), 2000)] if clean_lyrics_content else [{"text": {"content": " "}}]
 
     payload = {
         "parent": {"database_id": database_id},
@@ -165,8 +201,8 @@ def get_chunks(text):
             "Suno": {"rich_text": [{"text": {"content": data_dict.get("suno", "")[:2000]}}]},    
             "Image": {"rich_text": [{"text": {"content": data_dict.get("image", "")[:2000]}}]},   
             "Vocal": {"rich_text": [{"text": {"content": data_dict.get("vocal", "")[:2000]}}]},
-            "Lyrics": {"rich_text": get_chunks(data_dict.get("clean_lyrics", " "))},
-            "E_Lyrics": {"rich_text": get_chunks(data_dict.get("lyrics", " "))}, # 👈 추가된 E_Lyrics 칸
+            "Lyrics": {"rich_text": clean_lyrics_chunks}, 
+            "E_Lyrics": {"rich_text": get_chunks(data_dict.get("lyrics", " "))},
             "Tag": {"rich_text": [{"text": {"content": data_dict.get("tag", "")[:2000]}}]},
             "Genre": {"rich_text": [{"text": {"content": genre}}]},
             "Upload": {"rich_text": [{"text": {"content": data_dict.get("upload", "")[:2000]}}]} 
@@ -175,10 +211,12 @@ def get_chunks(text):
     }
     
     response = requests.post('https://api.notion.com/v1/pages', headers=headers, json=payload)
+    
+    print(f"📊 [결과] HTTP 상태 코드: {response.status_code}")
     if response.status_code == 200:
-        print("✅ Notion 저장 성공!")
+        print("✅ Notion 저장 성공! 모든 데이터가 들어갔습니다.")
     else:
-        print(f"❌ 저장 실패: {response.text}")
+        print(f"❌ Notion 저장 실패! 상세 사유: {response.text}")
         
 def main():
     try:
@@ -209,7 +247,12 @@ def main():
         f"Intro, Chorus, Verse1, Verse2, Bridge, Outro 등으로 구분해서 한곡 완성해주세요."
     )
 
+    print(f"\n[1] 생성된 프롬프트: {final_prompt}")
+    print("\n[2] Gemini 가사 생성 중...")
+    
     result_data = generate_lyrics_with_gemini(final_prompt)
+    
+    print("\n[3] Notion 저장 시도...")
     save_to_notion(current_date, selected_genre, current_weather, final_prompt, result_data)
 
 if __name__ == "__main__":
