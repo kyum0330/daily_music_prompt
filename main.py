@@ -143,6 +143,7 @@ def save_to_notion(date_str, genre, weather, prompt, data_dict):
 headers = {"Authorization": f"Bearer {notion_token}", "Content-Type": "application/json", "Notion-Version": "2022-06-28"}
     
     # 가사 쪼개기 도우미 함수
+
 def get_chunks(text):
         return [{"text": {"content": text[i:i+2000]}} for i in range(0, max(1, len(text)), 2000)]
 
