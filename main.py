@@ -121,7 +121,7 @@ Based on the feeling of 'Rough and Stopped Canvas on an Endless Clear Day' on Ma
         extracted["image"] = (
             f"[곡 상세 정보]\n{extracted.get('detail', '')}\n\n"
             f"[기획 의도]\n{extracted.get('purpose', '')}\n\n"
-            f"💡 위 내용을 바탕으로, 이 노래의 분위기를 완벽하게 표현하는 앨범 커버 이미지를 하나 만들어줘."
+            f"💡 위 내용을 바탕으로, 이 노래의 분위기를 완벽하게 표현하는 이에 맞는 16:9 의 영상 제작에 맞는 썸네일 하나 작성 부탁할게요. 이때, 노래에 대한 설명은 글로 표현하지 않아도 되요.."
         )
 
         # 🌟 디버깅 로그 출력: 제미나이가 만든 항목별 글자 수를 GitHub 액션 화면에 보여줍니다.
