@@ -74,7 +74,7 @@ def generate_lyrics_with_gemini(prompt):
 ###UPLOAD###
 유튜브 업로드용 요약 양식으로 작성해주세요. 
 형식: [해쉬태그 5개] + [날짜와 감정 기반 짧은 소개글(한글)] + [날짜와 감정 기반 짧은 한글 소개글 영어로 번역] [곡 정보 요약(제목, 장르, Tempo, Key, 악기)] 순서로 가독성 있게 작성해줘요.
-UPLOAD용 형식 예시는 다음과 같아요. 이때, 해쉬태그에 노래 제목은 제외하고 유튜브에서 노출이 많은 순서대로 넣어주세요.
+UPLOAD용 형식 예시는 다음과 같아요.
 
 #감성 #playlist #인디  #멜로딕일렉트로닉 #프로그레시브하우스
 
@@ -96,35 +96,38 @@ Based on the feeling of 'Rough and Stopped Canvas on an Endless Clear Day' on Ma
         response = model.generate_content(full_prompt)
         text = response.text
 
-        # 🌟 정규표현식 파싱 로직 업데이트 (CLEAN_LYRICS 추가)
-        text = re.sub(r'###\s*DETAIL\s*###', '###DETAIL###', text, flags=re.IGNORECASE)
-        text = re.sub(r'###\s*PURPOSE\s*###', '###PURPOSE###', text, flags=re.IGNORECASE)
-        text = re.sub(r'###\s*SUNO\s*###', '###SUNO###', text, flags=re.IGNORECASE)
-        text = re.sub(r'###\s*LYRICS\s*###', '###LYRICS###', text, flags=re.IGNORECASE)
-        text = re.sub(r'###\s*CLEAN_LYRICS\s*###', '###CLEAN_LYRICS###', text, flags=re.IGNORECASE)
-        text = re.sub(r'###\s*TAG\s*###', '###TAG###', text, flags=re.IGNORECASE)
-        text = re.sub(r'###\s*UPLOAD\s*###', '###UPLOAD###', text, flags=re.IGNORECASE)
+        # 🌟 강력한 정규표현식: 제미나이가 어떤 특수문자나 띄어쓰기를 섞어놔도 깔끔하게 통일시킵니다.
+        markers_base = ["DETAIL", "PURPOSE", "SUNO", "LYRICS", "CLEAN_LYRICS", "TAG", "UPLOAD"]
+        for m in markers_base:
+            text = re.sub(r'[*_]*#+\s*' + m + r'\s*#*[*_]*', f'###{m}###', text, flags=re.IGNORECASE)
 
-        markers = ["###DETAIL###", "###PURPOSE###", "###SUNO###", "###LYRICS###", "###CLEAN_LYRICS###", "###TAG###", "###UPLOAD###"]
-        extracted = {"detail": "", "purpose": "", "suno": "", "lyrics": "", "clean_lyrics": "", "tag": "", "upload": "", "image": ""}
+        markers = [f"###{m}###" for m in markers_base]
+        extracted = {m.lower(): "" for m in markers_base}
+        extracted["image"] = ""
 
         for marker in markers:
             if marker in text:
                 part = text.split(marker)[1]
                 min_idx = len(part)
                 for other_marker in markers:
-                    idx = part.find(other_marker)
-                    if idx != -1 and idx < min_idx:
-                        min_idx = idx
+                    if other_marker != marker:
+                        idx = part.find(other_marker)
+                        if idx != -1 and idx < min_idx:
+                            min_idx = idx
                 
                 key = marker.replace("#", "").lower()
                 extracted[key] = part[:min_idx].strip()
         
         extracted["image"] = (
-            f"[곡 상세 정보]\n{extracted['detail']}\n\n"
-            f"[기획 의도]\n{extracted['purpose']}\n\n"
+            f"[곡 상세 정보]\n{extracted.get('detail', '')}\n\n"
+            f"[기획 의도]\n{extracted.get('purpose', '')}\n\n"
             f"💡 위 내용을 바탕으로, 이 노래의 분위기를 완벽하게 표현하는 앨범 커버 이미지를 하나 만들어줘."
         )
+
+        # 🌟 디버깅 로그 출력: 제미나이가 만든 항목별 글자 수를 GitHub 액션 화면에 보여줍니다.
+        print("\n[4] 파싱된 섹션별 글자 수 (0이면 AI가 생성을 빼먹은 것입니다):")
+        for k, v in extracted.items():
+            print(f" - {k}: {len(v)}자")
 
         return extracted
         
@@ -136,8 +139,9 @@ def save_to_notion(date_str, genre, weather, prompt, data_dict):
     notion_token = os.environ.get("NOTION_TOKEN")
     database_id = os.environ.get("NOTION_DATABASE_ID")
     
-    if not notion_token or not database_id or not data_dict.get("lyrics"): 
-        print("❌ 저장할 가사(데이터)가 비어있어 Notion 호출을 취소합니다.")
+    # 가사가 정말로 비어있다면 아예 전송을 하지 않고 멈춥니다.
+    if not notion_token or not database_id or not data_dict.get("lyrics", "").strip(): 
+        print("❌ 저장할 가사(LYRICS) 데이터가 비어있어 Notion 호출을 취소합니다.")
         return
 
     headers = {
@@ -170,7 +174,6 @@ def save_to_notion(date_str, genre, weather, prompt, data_dict):
     children_blocks.append({"object": "block", "type": "divider", "divider": {}})
     children_blocks.append({"object": "block", "type": "paragraph", "paragraph": {"rich_text": [{"text": {"content": data_dict["tag"][:2000]}}]}})
 
-    # 🌟 클린 가사가 2000자를 넘을 경우를 대비해 쪼개서 넣는 안전장치입니다.
     clean_lyrics_content = data_dict["clean_lyrics"]
     clean_lyrics_chunks = [{"text": {"content": clean_lyrics_content[i:i+2000]}} for i in range(0, max(1, len(clean_lyrics_content)), 2000)] if clean_lyrics_content else [{"text": {"content": " "}}]
 
@@ -180,14 +183,14 @@ def save_to_notion(date_str, genre, weather, prompt, data_dict):
             "Title": {"title": [{"text": {"content": f"{date_str} ({genre})"}}]},
             "Weather": {"rich_text": [{"text": {"content": weather}}]},
             "Generated Prompt": {"rich_text": [{"text": {"content": prompt}}]},
-            "Detail": {"rich_text": [{"text": {"content": data_dict["detail"][:2000]}}]},
-            "Purpose": {"rich_text": [{"text": {"content": data_dict["purpose"][:2000]}}]},
-            "Suno": {"rich_text": [{"text": {"content": data_dict["suno"][:2000]}}]},    
-            "Image": {"rich_text": [{"text": {"content": data_dict["image"][:2000]}}]},   
-            "Lyrics": {"rich_text": clean_lyrics_chunks}, # 👈 새로 추가된 클린 가사 열 매핑
-            "Tag": {"rich_text": [{"text": {"content": data_dict["tag"][:2000]}}]},
+            "Detail": {"rich_text": [{"text": {"content": data_dict.get("detail", "")[:2000]}}]},
+            "Purpose": {"rich_text": [{"text": {"content": data_dict.get("purpose", "")[:2000]}}]},
+            "Suno": {"rich_text": [{"text": {"content": data_dict.get("suno", "")[:2000]}}]},    
+            "Image": {"rich_text": [{"text": {"content": data_dict.get("image", "")[:2000]}}]},   
+            "Lyrics": {"rich_text": clean_lyrics_chunks}, 
+            "Tag": {"rich_text": [{"text": {"content": data_dict.get("tag", "")[:2000]}}]},
             "Genre": {"rich_text": [{"text": {"content": genre}}]},
-            "Upload": {"rich_text": [{"text": {"content": data_dict["upload"][:2000]}}]} 
+            "Upload": {"rich_text": [{"text": {"content": data_dict.get("upload", "")[:2000]}}]} 
         },
         "children": children_blocks
     }
