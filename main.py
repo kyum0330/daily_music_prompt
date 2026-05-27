@@ -132,7 +132,10 @@ Based on the feeling of 'Rough and Stopped Canvas on an Endless Clear Day' on Ma
     except Exception as e:
         print(f"Gemini 에러: {e}")
         return {}
-
+def get_chunks(text):
+    if not text: return [{"text": {"content": " "}}]
+    return [{"text": {"content": text[i:i+2000]}} for i in range(0, len(text), 2000)]
+    
 def save_to_notion(date_str, genre, weather, prompt, data_dict):
     notion_token = os.environ.get("NOTION_TOKEN")
     database_id = os.environ.get("NOTION_DATABASE_ID")
