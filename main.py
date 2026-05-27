@@ -125,7 +125,7 @@ Based on the feeling of 'Rough and Stopped Canvas on an Endless Clear Day' on Ma
                 key = marker.replace("#", "").lower()
                 extracted[key] = part[:min_idx].strip()
         
-        extracted["image"] = f"[곡 상세 정보]\n{extracted.get('detail', '')}\n\n[기획 의도]\n{extracted.get('purpose', '')}\n\n💡 위 내용을 바탕으로 앨범 커버 이미지를 만들어줘."
+        extracted["image"] = f"[곡 상세 정보]\n{extracted.get('detail', '')}\n\n[기획 의도]\n{extracted.get('purpose', '')}\n\n💡 이에 맞는 16:9 의 영상 제작에 맞는 썸네일 하나 작성 부탁할게요. 이때, 노래에 대한 설명은 글로 표현하지 않아도 되요."
 
         return extracted
         
@@ -140,11 +140,11 @@ def save_to_notion(date_str, genre, weather, prompt, data_dict):
     if not notion_token or not database_id or not data_dict.get("lyrics"): 
         return
 
-    headers = {
-        "Authorization": f"Bearer {notion_token}",
-        "Content-Type": "application/json",
-        "Notion-Version": "2022-06-28"
-    }
+headers = {"Authorization": f"Bearer {notion_token}", "Content-Type": "application/json", "Notion-Version": "2022-06-28"}
+    
+    # 가사 쪼개기 도우미 함수
+    def get_chunks(text):
+        return [{"text": {"content": text[i:i+2000]}} for i in range(0, max(1, len(text)), 2000)]
 
     children_blocks = [{"object": "block", "type": "heading_2", "heading_2": {"rich_text": [{"text": {"content": "🎶 Gemini 생성 가사 및 곡 구성"}}]}}]
     for para in data_dict["lyrics"].split('\n\n'):
@@ -153,9 +153,6 @@ def save_to_notion(date_str, genre, weather, prompt, data_dict):
     
     children_blocks.append({"object": "block", "type": "divider", "divider": {}})
     children_blocks.append({"object": "block", "type": "paragraph", "paragraph": {"rich_text": [{"text": {"content": data_dict.get("tag", "")[:2000]}}]}})
-
-    clean_lyrics_content = data_dict.get("clean_lyrics", "")
-    clean_lyrics_chunks = [{"text": {"content": clean_lyrics_content[i:i+2000]}} for i in range(0, max(1, len(clean_lyrics_content)), 2000)]
 
     payload = {
         "parent": {"database_id": database_id},
@@ -167,8 +164,9 @@ def save_to_notion(date_str, genre, weather, prompt, data_dict):
             "Purpose": {"rich_text": [{"text": {"content": data_dict.get("purpose", "")[:2000]}}]},
             "Suno": {"rich_text": [{"text": {"content": data_dict.get("suno", "")[:2000]}}]},    
             "Image": {"rich_text": [{"text": {"content": data_dict.get("image", "")[:2000]}}]},   
-            "Vocal": {"rich_text": [{"text": {"content": data_dict.get("vocal", "")[:2000]}}]}, # 👈 추가
-            "Lyrics": {"rich_text": clean_lyrics_chunks}, 
+            "Vocal": {"rich_text": [{"text": {"content": data_dict.get("vocal", "")[:2000]}}]},
+            "Lyrics": {"rich_text": get_chunks(data_dict.get("clean_lyrics", " "))},
+            "E_Lyrics": {"rich_text": get_chunks(data_dict.get("lyrics", " "))}, # 👈 추가된 E_Lyrics 칸
             "Tag": {"rich_text": [{"text": {"content": data_dict.get("tag", "")[:2000]}}]},
             "Genre": {"rich_text": [{"text": {"content": genre}}]},
             "Upload": {"rich_text": [{"text": {"content": data_dict.get("upload", "")[:2000]}}]} 
@@ -177,7 +175,6 @@ def save_to_notion(date_str, genre, weather, prompt, data_dict):
     }
     
     response = requests.post('https://api.notion.com/v1/pages', headers=headers, json=payload)
-    
     if response.status_code == 200:
         print("✅ Notion 저장 성공!")
     else:
