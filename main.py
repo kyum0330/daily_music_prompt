@@ -240,13 +240,28 @@ def main():
     current_date = datetime.now().strftime("%Y년 %m월 %d일")
     current_weather = get_seoul_weather()
 
-    final_prompt = (
-        f"{selected_genre} 장르의 {current_date} {selected_time}의 "
-        f"{selected_emotion1} 한 {selected_action} 하는 {selected_place}에서의 "
-        f"{selected_emotion2} {current_weather} 날'의 느낌으로 가사를 작성해줘요."
-        f"Intro, Chorus, Verse1, Verse2, Bridge, Outro 등으로 구분해서 한곡 완성해주세요."
-    )
+    final_prompt = f"""
+<Current_Status>
+- 진행 단계: 초기 컨셉 브레인스토밍 및 최종 음원 데이터 완성
+- 타겟 결과물: 유튜브 및 오디오 플랫폼 업로드용 기획안 및 가사
+</Current_Status>
 
+<Brainstorming_Seed>
+- 장르: {selected_genre}
+- 배경/시간: {current_date}, {selected_time}
+- 날씨: {current_weather}
+- 장소 및 상황: {selected_place}에서 {selected_action} 하는 중
+- 감정선: {selected_emotion1} 분위기 속에서 느껴지는 {selected_emotion2}
+</Brainstorming_Seed>
+
+<Action_Steps>
+위의 <Brainstorming_Seed>를 바탕으로 다음 단계를 거쳐 작업을 수행해 줘.
+
+1) [내부 구상]: 이 키워드들을 엮어서 만들 수 있는 매력적인 스토리라인과 시각적 테마를 스스로 3가지 정도 깊이 있게 브레인스토밍 해봐. (이 과정은 너의 내부 추론을 위한 것이며 출력하지 않아도 됨)
+2) [최종 도출]: 네가 구상한 아이디어 중 가장 훌륭하고 트렌디한 1가지를 확정해.
+3) [포맷 출력]: 확정한 아이디어를 바탕으로, 시스템 프롬프트에서 요구한 ###DETAIL### 부터 ###UPLOAD### 까지의 8가지 필수 구분자 포맷에 맞추어 완벽한 최종 결과물만 출력해.
+</Action_Steps>
+"""
     print(f"\n[1] 생성된 프롬프트: {final_prompt}")
     print("\n[2] Gemini 가사 생성 중...")
     
