@@ -156,9 +156,9 @@ Based on the feeling of 'Rough and Stopped Canvas on an Endless Clear Day' on Ma
                 extracted[key] = part[:min_idx].strip()
         
         extracted["image"] = (
+            f"이 노래에 맞는 16:9 의 영상 제작에 맞는 썸네일 하나 트랜디한 느낌을 살려서 사람들의 시선을 끌 수 있게 제작 부탁할게요. 이때, 노래에 대한 제목과 설명은 글로 표현하지 말아주세요."
             f"[곡 상세 정보]\n{extracted.get('detail', '')}\n\n"
-            f"[기획 의도]\n{extracted.get('purpose', '')}\n\n"
-            f"💡 이에 맞는 16:9 의 영상 제작에 맞는 썸네일 하나 작성 부탁할게요. 이때, 노래에 대한 설명은 글로 표현하지 않아도 되요."
+            f"[기획 의도]\n{extracted.get('purpose', '')}
         )
 
         # 🌟 디버깅 로그 출력: 제미나이가 만든 항목별 글자 수를 GitHub 액션 화면에 보여줍니다.
