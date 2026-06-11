@@ -35,17 +35,45 @@ def get_seoul_weather():
 def generate_lyrics_with_gemini(prompt):
     api_key = os.environ.get("GEMINI_API_KEY")
     if not api_key:
+        print("🚨 GEMINI_API_KEY가 설정되지 않았습니다.")
         return {}
     
     genai.configure(api_key=api_key)
     
-    try:
-        available_models = [m.name for m in genai.list_models() if 'generateContent' in m.supported_generation_methods]
-        target_model = next((name for name in available_models if 'gemini-1.5-flash' in name), available_models[0] if available_models else None)
-        
-        if not target_model: return {}
+    # 🌟 우겸님을 위한 최강의 모델 우선순위 리스트
+    preferred_models = [
+        'gemini-1.5-flash',       # 1순위: 하루 1,500회! 한도가 가장 넉넉한 든든한 백업
+        'gemini-2.5-flash',       # 2순위: 원래 쓰시던 최신 버전 (하루 20회)
+        'gemini-flash-latest'     # 3순위: 최후의 생존 보루
+    ]
+    
+    # 리스트에 있는 모델을 순서대로 시도
+    for model_name in preferred_models:
+        try:
+            print(f"   🤖 [{model_name}] 모델로 생성을 시도합니다...")
+            model = genai.GenerativeModel(model_name)
             
-        model = genai.GenerativeModel(target_model)
+            # 모델 호출
+            response = model.generate_content(prompt)
+            
+            # (이하 기존과 동일한 JSON 파싱 로직)
+            result_text = response.text.strip()
+            if result_text.startswith('```json'):
+                result_text = result_text[7:]
+            if result_text.endswith('```'):
+                result_text = result_text[:-3]
+                
+            return json.loads(result_text) # 성공하면 즉시 결과 반환하고 함수 종료!
+            
+        except Exception as e:
+            # 에러가 발생하면 다음 모델로 넘어감
+            print(f"   ⚠️ [{model_name}] 오류 발생 (한도 초과 등): {e}")
+            print("   -> 🔄 다음 순위 모델로 전환합니다...")
+            continue 
+
+    # 모든 모델이 실패했을 경우
+    print("🚨 모든 모델에서 생성을 실패했습니다. (할당량 완전 소진 또는 서버 통신 오류)")
+    return {"suno": "", "lyrics": ""} # 빈 데이터 반환하여 방어
         
         system_instruction = """[멜로디 및 사운드 디자인 (Meta Tags) 강제 규칙]
 너는 감성을 자극하는 세계적인 엔터테인먼트 음반 회사의 천재적인 작사가 뿐 아니라 곡의 다이내믹을 설계하는 총괄 프로듀서에요.
