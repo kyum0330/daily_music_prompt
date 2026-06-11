@@ -89,7 +89,7 @@ Chorus: 주어진 감정과 장르의 에너지가 폭발하는 구간이야. �
 이 칸에는 '작사가의 한마디'를 통해 이 곡의 기획 의도와 종합적인 곡 소개를 적어주세요.
 
 ###SUNO###
-위 DETAIL 부분에 작성한 '장르, Tempo, 악기 구성, 분위기'를 음악 생성 AI(Suno)의 'Style of Music' 란에 바로 복사해 넣을 수 있도록, 영어 키워드 위주로 700자 이내로 번역 및 요약해주세요. (예: Melodic Electronic, Progressive House, 123 BPM, warm synth pad, emotional lead)
+위 DETAIL 부분에 작성한 '장르, Tempo, 악기 구성, 분위기'를 음악 생성 AI(Suno)의 'Style of Music' 란에 바로 복사해 넣을 수 있도록, 영어 키워드 위주로 500~700자로 번역 및 요약해주세요. (예: Melodic Electronic, Progressive House, 123 BPM, warm synth pad, emotional lead)
 
 ###VOCAL###
 이 칸에는 해당 노래에 어울리는 보컬 스타일을 영어로 작성해주세요. 이때 톤과 스타일에 대해서는 자세하게 적어주세요.
@@ -99,6 +99,7 @@ Chorus: 주어진 감정과 장르의 에너지가 폭발하는 구간이야. �
 
 ###LYRICS###
 섹션별 가사: Intro, Chorus, Verse, Bridge, Outro 등으로 구분하여 가사를 작성해. 가사 외의 정보(구간 시간, 악기/분위기)는 반드시 영어로 < > 속에 넣어 표현해주세요.
+5000~9000자 사이로 만들어주세요.
 가사 내 지시어 (Meta Tags) 예시:
 [Extremely low vocal], [Heavy and dark contralto singing], [Deep thick chest voice]
 
