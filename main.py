@@ -292,12 +292,46 @@ def main():
 </Action_Steps>
 """
     print(f"\n[1] 생성된 프롬프트: {final_prompt}")
-    print("\n[2] Gemini 가사 생성 중...")
     
-    result_data = generate_lyrics_with_gemini(final_prompt)
+    # --- 🌟 [글자 수 방어막 로직 시작] ---
+    max_retries = 5  # 최대 5번까지 재시도
+    result_data = {}
     
+    for attempt in range(max_retries):
+        print(f"\n[2] Gemini 가사 생성 중... (시도 {attempt + 1}/{max_retries})")
+        result_data = generate_lyrics_with_gemini(final_prompt)
+        
+        # 글자 수 측정
+        suno_content = result_data.get("suno", "")
+        lyrics_content = result_data.get("lyrics", "")
+        
+        suno_len = len(suno_content)
+        lyrics_len = len(lyrics_content)
+        
+        print(f"   -> 생성된 Style(Suno) 글자 수: {suno_len}자")
+        print(f"   -> 생성된 가사(Lyrics) 글자 수: {lyrics_len}자")
+        
+        # 조건 검사: Suno는 1000자 미만, Lyrics는 2500~4950자 사이 (안전 마진 50자)
+        if suno_len < 1000 and 2500 <= lyrics_len <= 4950:
+            print("   ✅ 글자 수 한계치 통과! 완벽합니다.")
+            break  # 조건에 맞으면 반복문 탈출
+        else:
+            print("   ⚠️ 글자 수 제한 초과 또는 미달! 다시 생성합니다.")
+            if suno_len >= 1000:
+                print("      - 사유: Style(Suno) 1000자 초과")
+            if lyrics_len > 4950:
+                print("      - 사유: 가사(Lyrics) 5000자 초과 위험")
+            if lyrics_len < 2500:
+                print("      - 사유: 가사(Lyrics)가 너무 짧음 (생략 발생 의심)")
+                
+    # 만약 5번을 다 시도했는데도 실패했다면 빈 데이터 방지
+    if not result_data.get("lyrics", "").strip():
+        print("❌ 유효한 길이의 데이터를 생성하는 데 실패했습니다. 파이프라인을 종료합니다.")
+        return
+    # --- 🌟 [글자 수 방어막 로직 끝] ---
+
     print("\n[3] Notion 저장 시도...")
-    save_to_notion(current_date, selected_genre, current_weather, final_prompt, result_data)
+    save_to_notion(current_date, selected_genre, final_prompt, result_data)
 
 if __name__ == "__main__":
     main()
