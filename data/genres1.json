@@ -1,4 +1,12 @@
 [
-    "댄스 팝", "인디", "힙합", "재즈", "알앤비", 
-    "발라드", "케이팝"
-  ]
+  "Dance Pop",  "Alternative Pop",  "Folk",
+  "Indie",  "Ballad",  "Hip Hop",
+  "Trap",  "R&B",  "Soul",
+  "Blues",  "Electronic",  "EDM",
+  "House",  "Deep House",  "Disco",
+  "Hyperpop",  "UK Garage",  "Jersey Club",
+  "Dubstep",  "Industrial",  "Jazz",
+  "Operatic Pop",  "Lo-fi",  "Afrobeat",
+  "Afro-Latin",  "Latin",  "Latin Pop",
+  "Reggae",  "Bossa Nova",  "Funk",  "Country"
+]
