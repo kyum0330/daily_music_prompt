@@ -37,9 +37,14 @@ def get_seoul_weather():
 def is_unwanted_combination(genre1, genre2):
     """ 원하지 않는 장르 조합인지 확인하는 함수입니다. 순서에 상관없이 매칭되도록 검사합니다. """
     unwanted_pairs = {
-        ("Liquid Drum & Bass", "City Pop"), ("Jersey Club", "Old-school Hip Hop"),
-        ("Moombahton", "New Jack Swing"), ("Miami Bass", "Contemporary R&B"), ("Favela Funk", "Synth Pop"), 
-        ("House", "Moombahton"), ("Liquid Drum & Bass", "Contemporary R&B"), ("Favela Funk", "City Pop"), ("UK Garage", "Old-school Hip Hop")
+        ("Folk", "Dubstep"), ("Country", "Hyperpop"), ("Bossa Nova", "Industrial"), 
+        ("Operatic Pop", "Jersey Club"), ("Blues", "EDM"), ("Ballad", "Afrobeat"), 
+        ("Jazz", "Hyperpop"), ("Reggae", "Industrial"), ("Lo-fi", "Trap"), 
+        ("Operatic Pop", "Trap"), ("Folk", "Hyperpop"), ("Country", "Industrial"), 
+        ("Bossa Nova", "Dubstep"), ("Ballad", "Jersey Club"), ("Blues", "Hyperpop"), 
+        ("Lo-fi", "Dubstep"), ("Soul", "Industrial"), ("Jazz", "Dubstep"), 
+        ("Reggae", "Hyperpop"), ("Operatic Pop", "UK Garage"), ("Country", "Deep House"), 
+        ("Folk", "Jersey Club"), ("Bossa Nova", "Trap"), ("Ballad", "Industrial"), ("Indie", "EDM")
     }
     return (genre1, genre2) in unwanted_pairs or (genre2, genre1) in unwanted_pairs
     
@@ -55,6 +60,7 @@ def generate_lyrics_with_gemini(prompt):
     system_instruction = """[멜로디 및 사운드 디자인 (Meta Tags) 강제 규칙]
 너는 감성을 자극하는 세계적인 엔터테인먼트 음반 회사의 천재적인 작사가 뿐 아니라 곡의 다이내믹을 설계하는 총괄 프로듀서에요.
 요즘 트렌드를 조사한 후에, 제시된 [장르], [시간], [장소], [감정], [행동], [날씨] 데이터를 활용해, 선택된 두 장르의 비트감과 감정선이 가장 매력적으로 어우러지는 세련된 곡을 만들어야 해요.
+이때, 가사는 한 문장들이 너무 길지 않지만 중독성이 있고, 트랜디한 느낌으로 작성을 해주세요.
 
 [작사 핵심 및 메타 태그 규칙]
 1. 보컬 및 페르소나: [Smooth alto female vocal, deep calm voice, low octave, subdued pitch, clean natural voice, clear diction, effortless singing, gentle resonance, subtle vocal runs, relaxed delivery, mellow dynamics, soft instrumentation, chill R&B, Solo]. 
@@ -106,10 +112,223 @@ Suno AI가 흔한 중-고음 소프라노를 출력하지 않도록, 과도한 �
 
 6. [장르]별 시그니처 멜로디 패턴 강제
 주어진 [장르]의 정체성을 보여주는 '핵심 악기 + 보컬 스타일' 세트를 반드시 곡 전반에 깔아둬요. 이때 가사에 작성할때는 영어로 작성해주고, 그 해당 내용을 ()를 통해 부가설명은 하지않도록 해요.
-예) EDM/하우스: <강렬한 Build-up과 Drop>, <리듬감 있는 찹 보컬(Vocal Chop)>
-예) 재즈/블루스: <스윙 리듬, 그루비한 콘트라베이스>, <스캣(Scatting)과 여유로운 뒤축 박자>
-예) 발라드/오페라틱 팝: <웅장한 오케스트라 스트링>, <풍부한 성량, 호소력 짙은 흉성>
-모든 답변은 반드시 아래의 [구분자]를 사용하여 섹션을 나누어 작성해야 해요
+
+6-1. Dance Pop
+[작사 핵심 및 메타 태그 규칙]
+1. 비트 및 다이내믹 (4/4 댄스 그루브 설계): 
+- Verse 파트에서는 스네어를 가볍게 쓰고 묵직한 베이스 라인만으로 미니멀한 공간감을 열어줘. <Punchy synth bass, light percussion>
+- Chorus 파트에서는 꽉 찬 4/4 정박자 킥 드럼과 화려한 리드 신스를 터뜨려 에너지를 극대화해. <Four-on-the-floor kick, energetic dance pop drop>
+- 악기에 묻히지 않도록 보컬의 딕션을 명확히 살리고, 후렴구에서는 반복적이고 타격감 있는 단어를 배치해.
+
+6-2. Alternative Pop
+[작사 핵심 및 메타 태그 규칙]
+1. 비트 및 다이내믹 (변칙적 팝 리듬 설계): 
+- Verse 파트에서는 둔탁한 힙합 드럼이나 어쿠스틱 기타 하나만 배치해 일상적이고 쓸쓸한 무드를 잡아. <Muffled drum loop, raw acoustic guitar>
+- Chorus 파트에서는 예상치 못한 타이밍에 거친 신스와 베이스가 쏟아지며 다이내믹을 반전시켜. <Unexpected heavy synth drop, alternative pop climax>
+- 가사는 시적인 은유보다 말하듯 툭툭 던지는 대화체(Conversational)로 구성하여 진솔함을 강조해.
+
+6-3. Folk
+[작사 핵심 및 메타 태그 규칙]
+1. 비트 및 다이내믹 (어쿠스틱 서사 설계): 
+- Verse 파트에서는 타악기를 완전히 배제하고 섬세한 통기타 핑거피킹 하나만으로 화자를 집중시켜. <Minimalist fingerpicking, no drums>
+- Chorus 파트에서는 기타 스트로크가 넓어지고 부드러운 코러스 화음이 합류해 따뜻하게 감싸줘. <Warm acoustic strumming, gentle vocal harmonies>
+- 보컬이 호흡을 길게 가져가며 한 편의 서사시를 담담하게 읽어내려갈 수 있도록 가사에 충분한 여유 공간을 둬.
+
+6-4. Indie
+[작사 핵심 및 메타 태그 규칙]
+1. 비트 및 다이내믹 (로파이 밴드 사운드 설계): 
+- Verse 파트에서는 공간감 있는 리버브가 걸린 빈티지 일렉 기타로 몽환적이고 날것의 바이브를 연출해. <Vintage indie guitar, atmospheric reverb>
+- Chorus 파트에서는 심벌즈와 둔탁한 드럼 사운드가 넓게 퍼지며 벅차오르는 인디 팝 에너지를 만들어. <Crash cymbals, expansive indie pop energy>
+- 가사는 개인적이고 독특한 단어들을 조합해, 가성(Falsetto)으로 읊조리듯 부유하는 보컬 톤을 유도해.
+
+6-5. Ballad
+[작사 핵심 및 메타 태그 규칙]
+1. 비트 및 다이내믹 (오케스트라 빌드업 설계): 
+- Verse 파트에서는 오직 피아노 선율만으로 시작하여 보컬의 숨소리와 감정선에 귀 기울이게 해. <Solo emotional piano, quiet vocal intro>
+- Chorus 파트에서는 웅장한 스트링(현악기)과 리얼 드럼이 한꺼번에 터지며 감정을 폭발시켜. <Grand orchestral strings, powerful ballad climax>
+- 가사는 기승전결이 확실하게 폭발적인 고음을 뿜어낼 수 있는 긴 모음(ex: 아, 오)을 후렴구 끝에 배치해.
+
+6-6. Hip Hop
+[작사 핵심 및 메타 태그 규칙]
+1. 비트 및 다이내믹 (붐뱁 & 808 그루브 설계): 
+- Verse 파트에서는 일정한 드럼 루프와 깊은 808 베이스 위에 타이트한 랩이 끊기지 않고 이어지게 해. <Heavy 808 bass, steady hip-hop loop>
+- Chorus 파트에서는 브라스 샘플이나 강렬한 신스를 얹어 훅(Hook)의 무게감과 존재감을 키워. <Brass sample cuts, catchy hip-hop chorus>
+- 멜로디보다는 라임(Rhyme)과 펀치라인의 타격감이 곡을 이끌어갈 수 있도록 단어의 운율을 촘촘히 쪼개.
+
+6-7. Trap
+[작사 핵심 및 메타 태그 규칙]
+1. 비트 및 다이내믹 (하이햇 롤링 & 서브 베이스 설계): 
+- Verse 파트에서는 음산한 패드(Pad) 신스와 함께 하이햇을 잘게 쪼개어 긴장감을 극도로 끌어올려. <Fast rolling hi-hats, dark synth pad>
+- Chorus 파트에서는 거대하고 묵직한 서브 베이스가 지진처럼 울리며 압도적인 폭발력을 보여줘. <Deep sub-bass drop, aggressive trap energy>
+- 오토튠이 걸린 보컬이 스타카토처럼 끊어 치는 셋잇단음표(Triplet) 플로우를 탈 수 있게 단어를 짧게 구성해.
+
+6-8. R&B
+[작사 핵심 및 메타 태그 규칙]
+1. 비트 및 다이내믹 (텐션 & 레이백 그루브 설계): 
+- Verse 파트에서는 끈적한 EP(일렉트릭 피아노) 화음과 여백 있는 드럼으로 관능적인 무드를 열어. <Smooth Rhodes piano, laid-back groove>
+- Chorus 파트에서는 묵직한 베이스 라인과 화려한 보컬 레이어링(애드리브)을 통해 세련된 공간감을 채워. <Rich vocal layers, groovy R&B bassline>
+- 정박자보다 살짝 늦게 부르는 레이백(Layback) 보컬의 유연함을 위해 가사의 모음을 부드럽고 이어지도록 설계해.
+
+6-9. Soul
+[작사 핵심 및 메타 태그 규칙]
+1. 비트 및 다이내믹 (빈티지 아날로그 폭발력 설계): 
+- Verse 파트에서는 따뜻한 해먼드 오르간과 핑거스냅만으로 소울풀하고 절제된 감정을 끌어올려. <Warm Hammond organ, subtle finger snaps>
+- Chorus 파트에서는 리얼 브라스 섹션과 코러스 콰이어가 가세해 영혼을 토해내는 듯한 에너지를 터뜨려. <Rich brass section, passionate soulful belting>
+- 화려한 기교보다 흉성을 활용한 진한 감정선이 중요하므로, 가사에 호소력 있는 외침(Oh, Yeah)을 자연스럽게 섞어.
+
+6-10. Blues
+[작사 핵심 및 메타 태그 규칙]
+1. 비트 및 다이내믹 (12마디 슬로우 셔플 설계): 
+- Verse 파트에서는 무겁게 걷는 워킹 베이스와 하이햇으로 쓸쓸하고 건조한 블루스 스케일을 깔아줘. <Slow blues shuffle, walking bassline>
+- Chorus 파트에서는 마치 보컬의 아픔에 대답하듯 일렉 기타 솔로가 흐느끼며 다이내믹을 장악해. <Weeping guitar solo, gritty blues energy>
+- 삶의 고달픔을 토해내는 거친 톤(Raspy)을 연출할 수 있도록, 가사를 대화하듯 길고 늘어지게 뱉어내.
+
+6-11. Electronic
+[작사 핵심 및 메타 태그 규칙]
+1. 비트 및 다이내믹 (인공적 공간감 & 질감 설계): 
+- Verse 파트에서는 아날로그 악기를 완전히 배제하고 차가운 신디사이저 아르페지오로 우주적인 여백을 만들어. <Cold analog synthesizer, spacey arpeggios>
+- Chorus 파트에서는 복잡하게 얽힌 전자음 레이어와 묵직한 디지털 킥이 입체적인 클럽 사운드를 터뜨려. <Complex electronic layers, heavy digital kick>
+- 보컬에 보코더(Vocoder)나 공간계 이펙트가 깊게 걸려 하나의 악기처럼 들리도록 가사를 기계적으로 반복시켜.
+
+6-12. EDM
+[작사 핵심 및 메타 태그 규칙]
+1. 비트 및 다이내믹 (빌드업 & 빅룸 드롭 설계): 
+- Verse 파트에서는 공간을 여는 패드 사운드로 시작해, 점차 스네어 롤(Snare Roll)이 빨라지며 극도의 긴장감(Build-up)을 줘. <Rising snare roll build-up, sweeping filters>
+- Chorus(Drop) 파트에서는 가사를 멈추고 거대한 리드 신스와 킥 드럼만으로 페스티벌의 열광을 터뜨려. <Massive big-room drop, explosive EDM lead>
+- 코러스 돌입 직전 보컬이 단 하나의 결정적인 캐치프레이즈(Pre-drop Vocal)를 던지며 에너지를 점화하게 가사를 짜.
+
+6-13. House
+[작사 핵심 및 메타 태그 규칙]
+1. 비트 및 다이내믹 (4/4 Four-on-the-floor 그루브 설계): 
+- Verse 파트에서는 리드미컬한 하이햇과 퍼커션으로 가볍게 발을 구르게 만드는 그루브를 시작해. <Rhythmic hi-hats, light percussion>
+- Chorus 파트에서는 심장 박동처럼 정확한 120 BPM 4/4 킥 드럼과 반복적인 펑키 베이스라인이 곡을 지배해. <Four-on-the-floor kick drum, groovy house bass>
+- 깊은 감정 묘사보다는 대중들이 하나 되어 뛰어놀 수 있도록 후렴구에 매우 단순하고 최면적인 단어를 반복해.
+
+6-14. Deep House
+[작사 핵심 및 메타 태그 규칙]
+1. 비트 및 다이내믹 (다크 & 서브 베이스 설계): 
+- Verse 파트에서는 뮤트된 재즈 코드와 최소한의 킥 드럼으로 몽환적이고 심연 같은 새벽 무드를 연출해. <Muted synth chords, minimalistic beat>
+- Chorus 파트에서는 바닥을 구르는 무거운 서브 베이스(Sub-bass)가 부드럽게 밀려와 공간을 완전히 장악해. <Deep rolling sub-bass, atmospheric deep house>
+- 보컬이 고음을 내지 않고 속삭이듯 낮게 깔리도록 가사의 자음을 부드럽고 관능적인 단어들로 구성해.
+
+6-15. Disco
+[작사 핵심 및 메타 태그 규칙]
+1. 비트 및 다이내믹 (옥타브 베이스 & 레트로 댄스 설계): 
+- Verse 파트에서는 16비트로 찰랑거리는 펑키 기타 스트로크와 경쾌한 리듬으로 레트로한 도입부를 만들어. <Funky guitar comping, bright disco rhythm>
+- Chorus 파트에서는 옥타브를 쉴 새 없이 오르내리는 화려한 베이스라인과 오케스트라 스트링이 파티 분위기를 터뜨려. <Octave disco bassline, sweeping string section>
+- 남녀노소 즐길 수 있는 화려한 가성과 떼창(Chorus)이 돋보이도록 가사에 반짝이고 긍정적인 단어를 쏟아내.
+
+6-16. Hyperpop
+[작사 핵심 및 메타 태그 규칙]
+1. 비트 및 다이내믹 (금속성 글리치 & 과잉 자극 설계): 
+- Verse 파트에서는 기괴하게 피치(Pitch)가 변하는 보컬과 불규칙한 디지털 노이즈로 불안정하고 장난스러운 텐션을 잡아. <Erratic glitchy beats, distorted noise>
+- Chorus 파트에서는 고막을 찌르는 극단적인 금속성 신스와 깨질 듯한 베이스 디스토션을 과부하(Overload)시켜. <Overloaded metallic synth, extreme distortion>
+- 오토튠이 한계치까지 걸려 소리가 기계처럼 찢어지도록 가사를 과장되고 초현실적인 감정들로 채워 넣어.
+
+6-17. UK Garage
+[작사 핵심 및 메타 태그 규칙]
+1. 비트 및 다이내믹 (투스텝(2-Step) 쪼개기 설계): 
+- Verse 파트에서는 130 BPM 이상의 빠른 템포 속에서 따뜻한 EP 사운드와 함께 R&B 스타일의 여유로운 멜로디를 깔아. <Warm chords, fast underlying tempo>
+- Chorus 파트에서는 스네어와 킥이 정박을 교묘하게 피하는 당김음(Syncopation) 투스텝 비트를 터뜨려 바운스를 유도해. <Fast 2-step garage rhythm, wobbly bassline>
+- 비트는 빠르지만 보컬은 조급해하지 않고 무심하게(Chill) 박자를 타도록 가사에 세련된 영단어 훅을 섞어.
+
+6-18. Jersey Club
+[작사 핵심 및 메타 태그 규칙]
+1. 비트 및 다이내믹 (5-Kick 바운스 & 샘플 촙 설계): 
+- Verse 파트에서는 침대 스프링이 튀는 듯한 사운드나 잘게 썰린(Chopped) 보컬 샘플만으로 리드미컬한 여백을 줘. <Chopped vocal samples, bed squeak sound>
+- Chorus 파트에서는 심장을 때리는 특유의 '쿵-쿵-쿵-쿵쿵' 하는 저지 클럽 킥 패턴을 폭발시켜 무조건 춤추게 만들어. <Bouncy Jersey Club kick pattern, heavy sub-bass>
+- 긴 문장보다 짧게 끊어지는 '찰진' 단어들을 배치해 보컬이 드럼의 일부처럼 쫀득한 스타카토로 들리게 해.
+
+6-19. Dubstep
+[작사 핵심 및 메타 태그 규칙]
+1. 비트 및 다이내믹 (하프타임 워블 베이스 설계): 
+- Verse 파트에서는 극도로 느리고 서늘한 하프타임(Halftime) 리듬 속에 음산한 앰비언트 사운드를 깔아 폭풍 전야를 표현해. <Slow halftime drum, dark ambient intro>
+- Chorus(Drop) 파트에서는 금속이 갈리는 듯한 공격적이고 기괴한 워블 베이스(Wobble Bass)가 포효하며 에너지를 찢어버려. <Aggressive wobble bass drop, heavy screeching synth>
+- 후렴구에 노래가 거의 없이, 보컬 샘플을 괴성이나 효과음처럼 컷(Cut)하여 비트와 함께 박살 나도록 연출해.
+
+6-20. Industrial
+[작사 핵심 및 메타 태그 규칙]
+1. 비트 및 다이내믹 (기계 소음 & 메탈릭 비트 설계): 
+- Verse 파트에서는 공장의 쇳덩이가 부딪히는 소리나 건조한 기계 파열음을 드럼 비트 대신 사용해 억압적인 무드를 줘. <Cold metallic noise beat, grinding industrial ambiance>
+- Chorus 파트에서는 왜곡(Distortion)된 드럼과 찢어지는 베이스가 무자비하게 짓누르며 아방가르드한 파괴력을 보여. <Heavy bass distortion, crushing mechanical beat>
+- 보컬이 멜로디를 부르기보다 감정을 거세한 채 차갑고 건조하게 읊조리거나(Monotone) 샤우팅하도록 철학적 가사를 써.
+
+6-21. Jazz
+[작사 핵심 및 메타 태그 규칙]
+1. 비트 및 다이내믹 (어쿠스틱 스윙 & 즉흥 연주 설계): 
+- Verse 파트에서는 드럼 브러시의 부드러운 사운드와 업라이트 베이스의 워킹(Walking) 라인으로 유연한 공간을 열어. <Soft brushed drums, smooth walking bassline>
+- Chorus 파트에서는 브라스(트럼펫, 색소폰)가 메인 테마를 유니즌(Unison)으로 연주하며 경쾌한 스윙 리듬을 터뜨려. <Catchy brass section, upbeat swing feel>
+- 정해진 박자를 넘어 보컬이 자유롭게 박자를 밀고 당기는(Rubato) 스캣(Scatting)을 할 수 있도록 가사에 리듬감 있는 의성어를 넣어.
+
+6-22. Operatic Pop
+[작사 핵심 및 메타 태그 규칙]
+1. 비트 및 다이내믹 (팝 퍼커션 & 시네마틱 오케스트라 설계): 
+- Verse 파트에서는 현대적인 팝 비트 위에 잔잔한 피아노와 첼로를 얹어 고전적이고 서정적인 도입부를 만들어. <Modern pop percussion, subtle cello and piano>
+- Chorus 파트에서는 대편성 오케스트라와 장엄한 합창(Choir)이 결합되어 한 편의 영화 클라이맥스처럼 웅장하게 터져. <Grand orchestral arrangement, cinematic choir swell>
+- 보컬이 팝의 가성과 성악의 벨칸토(강력한 두성/흉성)를 오가며 운명적이고 장엄한 서사를 뿜어내도록 단어를 극적으로 써.
+
+6-23. Lo-fi
+[작사 핵심 및 메타 태그 규칙]
+1. 비트 및 다이내믹 (더스티 바이닐 & 칠아웃 설계): 
+- Verse 파트에서는 LP판의 타닥거리는 노이즈(Vinyl Crackle)와 필터가 걸려 뭉툭해진 킥 드럼으로 포근한 여백을 줘. <Dusty vinyl crackle, muffled lo-fi beat>
+- Chorus 파트에서는 따스하게 먹먹한 EP 피아노 화음이 느슨하게 얹히며 나른하고 편안한 칠아웃(Chill-out) 무드를 완성해. <Warm EP chords, relaxed 70BPM tempo>
+- 긴장감을 완전히 빼고 화자가 혼잣말을 하듯 허밍(Humming)하거나 속삭이도록 일상적이고 쓸쓸한 가사로 여백을 채워.
+
+6-24. Afrobeat
+[작사 핵심 및 메타 태그 규칙]
+1. 비트 및 다이내믹 (폴리리듬 & 최면적 그루브 설계): 
+- Verse 파트에서는 서아프리카 토속 타악기들이 겹겹이 쌓인 폴리리듬(Polyrhythm)으로 본능적인 텐션을 끓어올려. <Polyrhythmic percussion, driving tribal rhythm>
+- Chorus 파트에서는 반복적이고 끈적한 일렉 기타 리프와 두터운 베이스라인이 합류해 최면을 거는 듯한 그루브를 터뜨려. <Hypnotic electric guitar, deep afrobeat bassline>
+- 복잡한 멜로디 전개보다는 대중이 축제처럼 따라 부를 수 있는 단순하고 챈팅(Chanting, 다 같이 외침)하기 좋은 가사를 반복해.
+
+6-25. Afro-Latin
+[작사 핵심 및 메타 태그 규칙]
+1. 비트 및 다이내믹 (아프로 그루브 & 라틴 브라스 설계): 
+- Verse 파트에서는 아프로비트의 타악기 베이스에 라틴 음악의 클라베(Clave) 리듬을 섞어 경쾌한 댄스 스텝을 유도해. <Afro-Latin clave rhythm, upbeat percussion>
+- Chorus 파트에서는 화려한 쿠반 브라스(트럼펫, 트롬본) 섹션이 폭발하며 한여름 밤의 정열적인 카니발을 완성해. <Festive Cuban brass section, energetic carnival vibe>
+- 리듬을 타며 섹시하고 활기차게 밀어붙일 수 있도록 가사에 라틴어 추임새나 역동적인 리듬 단어들을 밀도 있게 배치해.
+
+6-26. Latin
+[작사 핵심 및 메타 태그 규칙]
+1. 비트 및 다이내믹 (콩가 퍼커션 & 플라멩코 기타 설계): 
+- Verse 파트에서는 빠르고 화려한 스패니시 어쿠스틱 기타와 최소한의 콩가 리듬으로 관능적이고 정열적인 긴장감을 줘. <Acoustic flamenco guitar, passionate conga rhythm>
+- Chorus 파트에서는 풀 밴드의 타악기가 쏟아지며 라틴 댄스의 극적인 다이내믹과 에너지를 강렬하게 발산해. <Explosive Latin percussion, dramatic dance energy>
+- 보컬이 'R' 발음을 강렬하게 굴리거나(Rolling Rs) 뜨겁게 외칠 수 있도록, 정열적이고 치명적인 사랑을 노래하는 단어를 써.
+
+6-27. Latin Pop
+[작사 핵심 및 메타 태그 규칙]
+1. 비트 및 다이내믹 (레게톤 베이스 & 메인스트림 신스 설계): 
+- Verse 파트에서는 대중적인 팝 신시사이저 아래에 묵직한 뎀보우(Dembow)/레게톤 비트를 깔아 세련된 그루브를 유지해. <Modern synth pad, reggaeton dembow beat>
+- Chorus 파트에서는 훅(Hook) 멜로디를 강조하는 브라이트 신스와 타격감 있는 클럽 베이스가 터지며 대중성을 극대화해. <Catchy bright synth, heavy Latin club bass>
+- 라틴 특유의 섹시함은 유지하되, 글로벌 팝 차트에서 통할 수 있도록 보컬이 매끄럽고 리드미컬하게 소화할 수 있는 영어/스페인어 믹스 훅을 줘.
+
+6-28. Reggae
+[작사 핵심 및 메타 태그 규칙]
+1. 비트 및 다이내믹 (스캥크 기타 & 두꺼운 베이스라인 설계): 
+- Verse 파트에서는 정박을 비우고 엇박에만 악기가 들어가는 스캥크(Skank) 기타와 림샷으로 느긋한 자메이카 무드를 만들어. <Off-beat skank guitar, relaxed rimshot drum>
+- Chorus 파트에서는 가슴을 울리는 극도로 두껍고 부드러운 베이스라인이 곡 전체를 느릿느릿 끌고 가는 그루브를 완성해. <Thick heavy reggae bassline, laid-back groove>
+- 박자에 쫓기지 않고 보컬이 정박보다 미세하게 늦게 부르는 여유(Layback)를 가질 수 있도록, 평화롭고 영적인 가사를 넉넉히 배치해.
+
+6-29. Bossa Nova
+[작사 핵심 및 메타 태그 규칙]
+1. 비트 및 다이내믹 (나일론 기타 & 소프트 삼바 설계): 
+- Verse 파트에서는 드럼 브러시로 긁는 약한 리듬 위에 클래식 나일론 기타의 당김음(Syncopation) 화음을 부드럽게 얹어. <Soft nylon guitar syncopation, gentle brushed snare>
+- Chorus 파트에서는 고급스러운 재즈 코드의 EP 피아노나 가벼운 플루트 선율이 더해져 해변의 산뜻한 바람 같은 다이내믹을 줘. <Sophisticated jazz chords, light flute melody>
+- 보컬이 감정을 폭발시키지 않고, 귓가에 조용히 ASMR처럼 읊조릴 수 있도록(Whispering) 아련하고 부드러운 단어로 가사를 채워.
+
+6-30. Funk
+[작사 핵심 및 메타 태그 규칙]
+1. 비트 및 다이내믹 (슬랩 베이스 & 16비트 촙 기타 설계): 
+- Verse 파트에서는 베이스 기타 줄을 뜯고 때리는 강력한 슬랩(Slap) 연주와 16비트의 날카로운 촙(Chop) 기타로 텐션을 확 잡아채. <Heavy slap bass groove, sharp 16-bit guitar chops>
+- Chorus 파트에서는 리드미컬하게 찌르는 브라스 컷과 파워풀한 킥 드럼이 합쳐져 무조건 몸을 흔들게 만드는 디스코/펑크 파티를 터뜨려. <Punchy brass cuts, explosive funk dance rhythm>
+- 보컬이 마치 베이스 기타처럼 스타카토로 글자를 짧게 끊어 부를 수 있도록, 파찰음(ㅋ, ㅌ, ㅍ 등)이 포함된 찰진 영단어 훅을 써.
+
+6-31. Country
+[작사 핵심 및 메타 태그 규칙]
+1. 비트 및 다이내믹 (밴조 & 어쿠스틱 드라이빙 설계): 
+- Verse 파트에서는 단순하고 정직한 4/4박자 드럼 위에 경쾌한 어쿠스틱 기타 스트로크를 깔아 소박하고 편안한 시골길 무드를 줘. <Brisk acoustic guitar strumming, simple 4/4 beat>
+- Chorus 파트에서는 밝은 밴조(Banjo) 핑거피킹과 피들(Fiddle/바이올린)이 합류하며 가슴 벅차고 따뜻한 에너지를 터뜨려. <Bright banjo picking, driving country energy>
+- 화려한 은유보다는 친구에게 이야기하듯 친근한 스토리텔링(고향, 맥주, 트럭 등 일상 소재)이 담백한 보컬로 전달되게 가사를 써.
 
 ###DETAIL###
 이 칸에는 노래 제목(Subject), 장르(Genre), Tempo, Key, 악기 구성을 포함한 정보와 작사 배경 및 분위기 구성을 적어주세요. (띄어쓰기 포함 총 800자 이내) 이때 노래 제목은 소재의 나열보다는 키워드 위주로 한개 또는 두개의 단어로 표현해주세요.
@@ -215,7 +434,7 @@ Suno AI가 흔한 중-고음 소프라노를 출력하지 않도록, 과도한 �
                 extracted[key] = part[:min_idx].strip()
         
         extracted["image"] = (
-            f"이 노래에 맞는 16:9 의 영상 제작에 맞는 썸네일 하나 트랜디한 느낌을 살려서 사람들의 시선을 끌 수 있게 제작 부탁할게요. 이때, 노래에 대한 제목과 설명은 글로 표현하지 말아주세요.\n\n"
+            f"이 노래에 맞는 16:9 의 영상 제작에 맞는 썸네일 하나 트랜디한 느낌을 살려서 사람들의 시선을 끌 수 있게 제작 부탁할게요. 인물을 생성해야 한다면, 수수하고 트랜디한 한국 20대 연예인 스타일로 만들어주세요. 이때, 노래에 대한 제목과 설명은 글로 표현하지 말아주세요.\n\n"
             f"[곡 상세 정보]\n{extracted.get('detail', '')}\n\n"
             f"[기획 의도]\n{extracted.get('purpose', '')}"
         )
