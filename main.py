@@ -2,6 +2,7 @@ import json
 import random
 import os
 import re
+import time
 from datetime import datetime
 import requests
 import google.generativeai as genai
@@ -399,6 +400,7 @@ Suno AI가 흔한 중-고음 소프라노를 출력하지 않도록, 과도한 �
                     break 
                 except Exception as e:
                     print(f"⚠️ {target} 실패 (사유: 할당량 초과 등) -> 다음 모델로 넘어갑니다.")
+                    time.sleep(5) # <--- [추가] 다음 모델로 넘어가기 전 짧은 대기
             else:
                 print(f"⚠️ {model_name} 모델은 현재 목록에 없어 건너뜁니다.")
                 
@@ -617,6 +619,11 @@ def main():
                 print("      - 사유: 가사(Lyrics) 5000자 초과 위험")
             if lyrics_len < 2500:
                 print("      - 사유: 가사(Lyrics)가 너무 짧음 (생략 발생 의심)")
+                
+                # [핵심 업데이트]: API 과부하를 막기 위한 강제 휴식 (마지막 시도 제외)
+            if attempt < max_retries - 1:
+                print("   ⏳ API 할당량 보호를 위해 15초 대기 후 재시도합니다...")
+                time.sleep(15)
                 
     if not result_data.get("lyrics", "").strip():
         print("❌ 유효한 길이의 데이터를 생성하는 데 실패했습니다. 파이프라인을 종료합니다.")
