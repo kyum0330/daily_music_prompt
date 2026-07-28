@@ -329,7 +329,17 @@ def main():
 이 곡과 어울리는 유튜브 노출용 트렌디 해쉬태그를 이용해서 한글과 영어 섞어서 정확히 30개 작성해줘요.
 
 ###UPLOAD###
-유튜브 업로드용 요약 양식으로 작성해주세요. 
+유튜브 업로드용 요약 양식으로 작성해주세요. 양삭은 하단의 예시를 참고해서 적어주세요. 유튜브 노출용 해쉬태그 5개, 작사가의 한마디, 그리고 곡 정보를 적어주세요.
+
+#EternalDusk #레게컨트리 #ReggaeCountry #ChillVibes #LoFiMusic
+
+2026년 7월 27일, 해 질 녘의 흐린 하늘 아래, 영원할 것 같은 차분함 속에서 피어나는 미묘한 감정의 파고를 그린다. 'Promising'과 'Destructive'라는 상반된 감정을 Reggae의 느긋하고 영적인 그루브와 Country의 담백하고 솔직한 스토리텔링으로 풀어낸다. 마치 석양 아래 고요히 흐르는 강물처럼, 평화로워 보이지만 그 밑에는 알 수 없는 깊이가 공존하는 순간을 음악으로 표현하고자 했다. 일상의 소박한 풍경 속에서 발견하는 관계의 복합적인 면모를 중저음 여성 보컬의 절제된 감성으로 담아내, 듣는 이에게 깊은 울림과 공감을 선사하는 곡이다.
+
+제목: Eternal Dusk
+장르: Chill Reggae Country Fusion, Lo-fi Roots
+Tempo: 80 BPM
+Key: G minor
+악기: Thick heavy reggae bassline, Off-beat skank guitar, Relaxed rimshot drum, Brisk acoustic guitar strumming, Bright banjo picking, Subtle fiddle, Warm synth pads, Gentle percussion, Clean electric guitar for solo.
 """
 
     user_prompt = f"""
