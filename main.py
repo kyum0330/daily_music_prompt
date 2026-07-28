@@ -257,8 +257,7 @@ def main():
 이때, 가사는 한 문장들이 너무 길지 않지만 중독성이 있고, 트랜디한 느낌으로 작성을 해주세요.
 
 [작사 핵심 및 메타 태그 규칙]
-1. 보컬 및 페르소나: [Smooth alto female vocal, deep calm voice, low octave, subdued pitch, clean natural voice, clear diction, effortless singing, gentle resonance, subtle vocal runs, relaxed delivery, mellow dynamics, soft instrumentation, chill R&B, Solo]. 
-Suno AI가 흔한 중-고음 소프라노를 출력하지 않도록, 과도한 기교 없이 담백하고 매력적인 중저음 보컬 톤을 강제해요. 보컬과 코러스 부분에 대해서는 다음 내용을 참고해주세요.
+1. 보컬 및 페르소나: Suno AI가 흔한 중-고음 소프라노를 출력하지 않도록, 과도한 기교 없이 담백하고 매력적인 중저음 보컬 톤을 강제해요. 보컬과 코러스 부분에 대해서는 다음 내용을 참고해주세요.
 
     1-1. 메타 태그 적용 (Lyrics 영역)
         곡이 고조되는 코러스(후렴구)나 브릿지 부분에 단순히 [Chorus]라고만 적으면 AI가 마음대로 소리를 내지를 확률이 높습니다. 이럴 때는 대괄호 안에 보컬의 창법을 직접 제한해 주세요.
