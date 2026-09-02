@@ -20,7 +20,6 @@ def get_random_item(data):
     elif isinstance(data, list):
         return random.choice(data)
 
-# [기존 유지 항목]: 날씨 정보를 가져오는 함수
 def get_seoul_weather():
     api_key = os.environ.get("WEATHER_API_KEY") 
     if api_key:
@@ -34,7 +33,6 @@ def get_seoul_weather():
             print(f"날씨 정보를 가져오는 중 에러 발생: {e}")
     return "날씨 정보 오류"
 
-# [유지 항목]: 원하지 않는 장르 조합 확인
 def is_unwanted_combination(genre1, genre2):
     unwanted_pairs = {
         ("Folk", "Dubstep"), ("Country", "Hyperpop"), ("Bossa Nova", "Industrial"), 
@@ -62,9 +60,8 @@ def generate_lyrics_with_gemini(full_prompt):
         print(f"🧐 [참고] 사용 가능한 모델 총 {len(available_models)}개 확인 완료")
         
         preferred_models = [
-            'models/gemini-2.5-flash',        
-            'models/gemini-1.5-flash',
-            'models/gemini-flash-latest'
+            'models/gemini-1.5-flash',       # 1순위: 복잡한 지시 수행력이 더 높은 일반 모델
+            'models/gemini-2.5-flash-lite'   # 2순위: 속도가 빠르고 할당량이 넉넉한 백업 모델
         ]
         
         success = False
@@ -82,10 +79,10 @@ def generate_lyrics_with_gemini(full_prompt):
                     success = True
                     break 
                 except Exception as e:
-                    print(f"⚠️ {target} 실패 (사유: {e}) -> 다음 모델로 넘어갑니다.")
-                    time.sleep(5) # 모델 변경 전 짧은 대기
+                    print(f"⚠️ {target} 실패 (사유: 할당량 초과 등) -> 다음 모델로 자동 전환합니다.")
+                    time.sleep(3) 
             else:
-                print(f"⚠️ {model_name} 모델은 현재 목록에 없어 건너뜁니다.")
+                print(f"⚠️ {model_name} 모델은 현재 계정 목록에 없어 건너뜁니다.")
                 
         if not success:
             print("❌ 준비된 모든 대체 모델이 할당량 초과로 실패했습니다. 자정이 지나길 기다리거나 결제 연동이 필요합니다.")
@@ -213,7 +210,6 @@ def main():
         actions = load_data('data/actions.json')
         places = load_data('data/places.json')
         emotions2 = load_data('data/emotions2.json')
-        # [핵심 추가]: 장르별 세부 규칙 파일 로드
         genre_rules = load_data('data/genre_rules.json')
     except Exception as e:
         print(f"데이터 로드 실패: {e}")
@@ -236,7 +232,6 @@ def main():
         print("❌ 유효한 장르 조합을 찾는 데 실패했습니다.")
         return
 
-    # [핵심 추가]: 뽑힌 2개 장르의 규칙만 추출 (없을 경우 대비 기본값 세팅)
     rule_for_genre1 = genre_rules.get(selected_genre1, f"{selected_genre1}의 특성을 잘 살려서 편곡해줘.")
     rule_for_genre2 = genre_rules.get(selected_genre2, f"{selected_genre2}의 특성을 잘 살려서 편곡해줘.")
 
@@ -250,7 +245,6 @@ def main():
     current_date = datetime.now().strftime("%Y년 %m월 %d일")
     current_weather = get_seoul_weather()
 
-    # [핵심 변경]: system_instruction을 main 안으로 옮기고 동적으로 조립
     system_instruction = f"""[멜로디 및 사운드 디자인 (Meta Tags) 강제 규칙]
 너는 감성을 자극하는 세계적인 엔터테인먼트 음반 회사의 천재적인 작사가 뿐 아니라 곡의 다이내믹을 설계하는 총괄 프로듀서에요.
 요즘 트렌드를 조사한 후에, 제시된 [장르], [시간], [장소], [감정], [행동], [날씨] 데이터를 활용해, 선택된 두 장르의 비트감과 감정선이 가장 매력적으로 어우러지는 세련된 곡을 만들어야 해요.
